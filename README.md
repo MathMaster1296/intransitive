@@ -38,13 +38,13 @@ captures is a draw.
 
 ## Run it locally
 
-It is static files. Any web server will do; for example:
+Everything is static files, so any web server will do. For example:
 
 ```bash
 python3 -m http.server 8093
 ```
 
-then open http://localhost:8093/. The computer opponent uses a module
+Then open http://localhost:8093/. The computer opponent uses a module
 worker, so the page needs to be served over http rather than opened as a
 file.
 

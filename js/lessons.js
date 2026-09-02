@@ -34,7 +34,7 @@ function ringLabels(player) {
 export const DIAGRAMS = {
   start: {
     board: startingBoard(),
-    caption: 'The opening position. Each side has three rocks, four papers and three scissors, with the scissors out in front.',
+    caption: 'This is the opening position. Each side has three rocks, four papers and three scissors, with the scissors out in front.',
   },
   movement: {
     board: boardFrom({ blue: { P: ['e5'] } }),
@@ -45,7 +45,7 @@ export const DIAGRAMS = {
     board: boardFrom({ blue: { R: ['e5'] }, red: { S: ['f6'], P: ['d6'], R: ['f4'] } }),
     targets: cellsOf(['d4', 'd5', 'e4', 'e6', 'f5', 'f6']),
     marks: markMap([['no', ['d6', 'f4']]]),
-    caption: 'The blue rock can capture the scissors on f6. It cannot move onto the paper or the other rock, so those squares are simply off limits.',
+    caption: 'The blue rock can capture the scissors on f6. It cannot move onto the paper or the other rock, so those squares are off limits.',
   },
   goal: {
     board: boardFrom({ blue: { S: ['h8'] }, red: { R: ['b2'] } }),
@@ -65,26 +65,26 @@ export const DIAGRAMS = {
   rings: {
     board: boardFrom({ blue: { S: ['b2'] }, red: { P: ['e4'] } }),
     rings: BLUE,
-    caption: 'Rings counted from blue\'s corner. Every square on a ring is the same number of moves from a1. The red paper is on ring 4, the blue scissors on ring 1.',
+    caption: 'These are the rings counted from blue\'s corner. Every square on a ring is the same number of moves from a1. The red paper is on ring 4 and the blue scissors is on ring 1.',
   },
   matchup: {
     board: boardFrom({
       blue: { R: ['b2', 'c3', 'd2'], P: ['b4', 'c5', 'e2', 'd4'], S: ['e5'] },
       red: { R: ['g7', 'h6'], P: ['f7', 'e8', 'h4'], S: ['e6', 'g5', 'g8'] },
     }),
-    caption: 'Eight pieces each and nobody is closer to a corner, yet red is better. Blue has one scissors to answer three red papers.',
+    caption: 'Both sides have eight pieces and nobody is closer to a corner, yet red is better. Blue has one scissors to answer three red papers.',
   },
   passive: {
     board: boardFrom({ blue: { P: ['a3'], S: ['f3'], R: ['h7'] }, red: { P: ['c3'], R: ['h8'] } }),
     rings: BLUE,
     marks: markMap([['path', ['a2', 'a1']], ['danger', ['b2', 'b1']]]),
-    caption: 'Passive defence. Red\'s paper on ring 2 wants a1. Blue\'s paper is also on ring 2, and it is blue\'s move, so a3-a2 gets ahead and reaches the corner first. The red paper can never take it there.',
+    caption: 'The red paper on ring 2 wants a1. Blue\'s paper is also on ring 2, and it is blue\'s move, so a3-a2 gets ahead and reaches the corner first. That is a passive defence, and the red paper can never take a paper sitting in the corner.',
   },
   active: {
     board: boardFrom({ blue: { S: ['c4'], R: ['g2'] }, red: { P: ['c3'], R: ['h8'] } }),
     rings: BLUE,
     targets: cellsOf(['c3']),
-    caption: 'Active defence. The scissors captures the attacker outright, which is better than blocking because the threat is gone for good.',
+    caption: 'The blue scissors captures the attacker outright. That is an active defence, and it beats blocking because the threat is gone for good.',
   },
   sides: {
     board: boardFrom({ blue: { R: ['b6', 'f2'] }, red: { S: ['e2'], P: ['h8'] } }),
@@ -96,7 +96,7 @@ export const DIAGRAMS = {
     board: boardFrom({ blue: { R: ['c6'], P: ['e2'] }, red: { S: ['a7'], R: ['h8'], P: ['i7'] } }),
     targets: cellsOf(['b7']),
     marks: markMap([['danger', ['a6', 'a8', 'b6', 'b8']]]),
-    caption: 'A trap. After c6-b7 the red scissors has four squares to run to, and the rock covers all of them. Micro position turns into material.',
+    caption: 'After c6-b7 the red scissors has four squares to run to, and the rock covers all of them. That is a trap, and micro position has just turned into material.',
   },
 };
 

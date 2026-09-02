@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Intransitive</title>
-<meta name="description" content="Play Intransitive in the browser: rock, paper and scissors pieces on a nine by nine board, racing for the far corner. Rules, strategy notes and puzzles included.">
+<meta name="description" content="Play Intransitive in the browser, a nine by nine board game where rock, paper and scissors pieces race for the far corner. The site includes the rules, strategy notes and puzzles.">
 <meta property="og:title" content="Intransitive">
-<meta property="og:description" content="Rock, paper and scissors on a nine by nine board. Play against the computer or a friend, learn the rules, and try the puzzles.">
+<meta property="og:description" content="Rock, paper and scissors meet on a nine by nine board. Play against the computer or a friend, learn the rules, and try the puzzles.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23ded3bc'/><circle cx='10' cy='22' r='7' fill='%232f6ee8'/><circle cx='22' cy='10' r='7' fill='%23e04848'/></svg>">
 <meta name="theme-color" content="#f3f4f7" media="(prefers-color-scheme: light)">
@@ -40,7 +40,7 @@
 <section id="view-play" class="view">
   <div class="hero">
     <h1>Intransitive</h1>
-    <p class="lead">Rock, paper and scissors on a nine by nine board. Get any piece into the far corner before your opponent does.</p>
+    <p class="lead">Rock, paper and scissors meet on a nine by nine board. Get any piece into the far corner before your opponent does.</p>
   </div>
   <div class="play-layout">
     <div class="board-wrap">
@@ -134,7 +134,7 @@
 
   <div class="prose">
     <h2>Capturing</h2>
-    <p>Rock captures scissors, scissors captures paper, and paper captures rock. To capture, move your piece onto an enemy piece it beats, and the enemy piece is removed. You can never move onto one of your own pieces, and you can never move onto an enemy piece your piece does not beat, which includes an enemy piece of the same type. Those squares are simply unavailable.</p>
+    <p>Rock captures scissors, scissors captures paper, and paper captures rock. To capture, move your piece onto an enemy piece it beats, and the enemy piece is removed. You can never move onto one of your own pieces, and you can never move onto an enemy piece your piece does not beat, which includes an enemy piece of the same type. You cannot move there at all.</p>
     <p>There are no ties and no bounces. A rock next to a rock just sits there.</p>
   </div>
   <div class="figure-row">
@@ -153,10 +153,8 @@
 
   <div class="prose">
     <h2>Two rules you will rarely need</h2>
-    <ul class="rule-list">
-      <li><strong>No stalemate.</strong> If it is your turn and you have no legal move, you lose immediately. In practice this almost only happens when you have no pieces left.</li>
-      <li><strong>Stagnation.</strong> If 100 moves go by with no capture at all, the game is a draw. There is no draw by repetition. Most games are decided well before move 50, so this rule mostly matters against very defensive opponents.</li>
-    </ul>
+    <p>There is no stalemate. If it is your turn and you have no legal move, you lose immediately. In practice this almost only happens when you have no pieces left.</p>
+    <p>There is a stagnation rule. If 100 moves go by with no capture at all, the game is a draw. There is no draw by repetition. Most games are decided well before move 50, so this rule mostly matters against very defensive opponents.</p>
   </div>
   <div class="figure-row">
     <figure><div data-diagram="nomoves"></div><figcaption></figcaption></figure>
@@ -170,13 +168,13 @@
 
 <section id="view-strategy" class="view" hidden>
   <h1>Strategy notes</h1>
-  <p class="lead">A summary of the ideas in webgoatguy's <a href="https://www.youtube.com/watch?v=LO_zcGNJriA">How To Play &amp; Basic Strategy</a> video, with diagrams you can check against the board. Watch the video for the worked games; this page is the reference card.</p>
+  <p class="lead">This page collects the ideas from webgoatguy's <a href="https://www.youtube.com/watch?v=LO_zcGNJriA">How To Play &amp; Basic Strategy</a> video, with diagrams you can check against the board. Watch the video for the worked games. This page is the reference card.</p>
 
   <div class="prose">
     <h2>Three kinds of advantage</h2>
-    <p><strong>Material</strong> is the simple one: more pieces than the other side. It is exactly as good as it sounds.</p>
-    <p><strong>Position</strong> comes in two sizes. Macro position means your pieces are closer to the enemy corner than theirs are to yours. A cramped opponent has fewer useful moves, and more importantly the endgame is a race, so trading down into an endgame favours whoever is already further forward. Micro position is about where pieces stand relative to each other: an isolated enemy scissors with your rock nearby is a target, and a fork is a piece attacking two things at once.</p>
-    <p><strong>Matchup</strong> is the one that is unique to this game. Each of your piece types is only worth something if the enemy has pieces it can capture, and each enemy type is only dangerous if you have pieces it can capture. A side with a single scissors against several enemy papers is in trouble, because one scissors can only answer one paper at a time. Two papers attacking two different places will break through. In general a balanced distribution is the safest, but the right distribution depends on what the other side has left, and it is worth counting the pieces on both sides every few moves.</p>
+    <p>Material is the simple one: you have more pieces than the other side. It is exactly as good as it sounds.</p>
+    <p>Position comes in two sizes. Macro position means your pieces are closer to the enemy corner than theirs are to yours. A cramped opponent has fewer useful moves, and more importantly the endgame is a race, so trading down into an endgame favours whoever is already further forward. Micro position is about where pieces stand relative to each other: an isolated enemy scissors with your rock nearby is a target, and a fork is a piece attacking two things at once.</p>
+    <p>Matchup is the one that is unique to this game. Each of your piece types is only worth something if the enemy has pieces it can capture, and each enemy type is only dangerous if you have pieces it can capture. A side with a single scissors against several enemy papers is in trouble, because one scissors can only answer one paper at a time. Two papers attacking two different places will break through. In general a balanced distribution is the safest, but the right distribution depends on what the other side has left, and it is worth counting the pieces on both sides every few moves.</p>
     <p>Whoever holds two of the three advantages usually wins.</p>
   </div>
   <div class="figure-row">
@@ -194,8 +192,8 @@
   <div class="prose">
     <h2>Passive and active defence</h2>
     <p>Sooner or later an enemy piece slips past your pieces and starts running for your corner. You have two ways to stop it.</p>
-    <p>A <strong>passive defence</strong> puts a piece in your own corner that the runner cannot capture, which means a piece of the same type or the type that beats it. The runner is still alive and still a threat, but it cannot finish. The rule is simple: you have to reach the corner first, so you have to stay ahead of the runner in rings. If the runner is on ring 5 and it is your move, your blocker needs to step onto ring 4 now, then ring 3 when the runner reaches ring 4, and so on. Do that and you will always arrive first, unless one of your own pieces is standing in the way.</p>
-    <p>An <strong>active defence</strong> uses the piece type that beats the runner and simply captures it. The same ring rule mostly applies, with one bit of extra slack: a defender that is one ring behind the runner can still catch it if both are on the same side of the ring, because it can shadow the runner along the edge. From the other side of the ring it never catches up.</p>
+    <p>A passive defence puts a piece in your own corner that the runner cannot capture, which means a piece of the same type or the type that beats it. The runner is still alive and still a threat, but it cannot finish. The rule is simple: you have to reach the corner first, so you have to stay ahead of the runner in rings. If the runner is on ring 5 and it is your move, your blocker needs to step onto ring 4 now, then ring 3 when the runner reaches ring 4, and so on. Do that and you will always arrive first, unless one of your own pieces is standing in the way.</p>
+    <p>An active defence uses the piece type that beats the runner and captures it. The same ring rule mostly applies, with one bit of extra slack: a defender that is one ring behind the runner can still catch it if both are on the same side of the ring, because it can shadow the runner along the edge. From the other side of the ring it never catches up.</p>
   </div>
   <div class="figure-row">
     <figure><div data-diagram="passive"></div><figcaption></figcaption></figure>
@@ -217,14 +215,14 @@
 
   <div class="prose">
     <h2>Endgames</h2>
-    <p>Once the board thins out, macro position and matchup decide almost everything, and the variety is enormous. One rock, one paper and one scissors against two rocks and one paper plays nothing like two papers against a rock and a scissors. A common pattern for the stronger side is to park one piece in the home corner as a permanent block and walk the others forward. The video's author has played around fifty games and says no two endgames have looked alike.</p>
+    <p>Once the board thins out, macro position and matchup decide almost everything, and the variety is enormous. One rock, one paper and one scissors against two rocks and one paper plays nothing like two papers against a rock and a scissors. A common pattern for the stronger side is to park one piece in the home corner as a permanent block and walk the others forward. webgoatguy has played around fifty games and says no two endgames have looked alike.</p>
     <p>If you want to test any of this, the <a href="#puzzles">puzzles</a> page has positions built around these ideas, and the computer on the play page uses the same three advantages in its evaluation.</p>
   </div>
 </section>
 
 <section id="view-puzzles" class="view" hidden>
   <h1>Puzzles</h1>
-  <p class="lead">Short positions built around the defensive ideas in the strategy notes. Each one has a single decisive idea. Click a piece, then a square.</p>
+  <p class="lead">These are short positions built around the defensive ideas in the strategy notes. Each one turns on a single idea. Click a piece, then a square.</p>
   <div class="puzzle-layout">
     <div class="board-wrap">
       <div id="puzzle-board" aria-label="Puzzle board"></div>
