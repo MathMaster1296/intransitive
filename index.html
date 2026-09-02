@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Intransitive</title>
+<meta name="description" content="Play Intransitive in the browser: rock, paper and scissors pieces on a nine by nine board, racing for the far corner. Rules, strategy notes and puzzles included.">
+<meta property="og:title" content="Intransitive">
+<meta property="og:description" content="Rock, paper and scissors on a nine by nine board. Play against the computer or a friend, learn the rules, and try the puzzles.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23ded3bc'/><circle cx='10' cy='22' r='7' fill='%232f6ee8'/><circle cx='22' cy='10' r='7' fill='%23e04848'/></svg>">
+<meta name="theme-color" content="#f3f4f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14171c" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="top">
+  <a class="wordmark" href="#play">
+    <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#ded3bc"/><circle cx="10" cy="22" r="7" fill="#2f6ee8"/><circle cx="22" cy="10" r="7" fill="#e04848"/></svg>
+    Intransitive
+  </a>
+  <nav class="tabs" aria-label="Sections">
+    <a href="#play">play</a>
+    <a href="#rules">rules</a>
+    <a href="#strategy">strategy</a>
+    <a href="#puzzles">puzzles</a>
+    <a href="#about">about</a>
+  </nav>
+  <div class="top-right">
+    <button class="ghost" id="theme-btn" title="switch theme">theme</button>
+  </div>
+</header>
+
+<main>
+
+<section id="view-play" class="view">
+  <div class="hero">
+    <h1>Intransitive</h1>
+    <p class="lead">Rock, paper and scissors on a nine by nine board. Get any piece into the far corner before your opponent does.</p>
+  </div>
+  <div class="play-layout">
+    <div class="board-wrap">
+      <div id="board" aria-label="Game board"></div>
+      <div id="overlay" class="overlay" hidden>
+        <div class="card">
+          <strong id="overlay-text"></strong>
+          <button id="overlay-new" class="primary" type="button">New game</button>
+        </div>
+      </div>
+    </div>
+    <aside class="panel">
+      <div class="card">
+        <div class="turn-line"><span id="turn-dot" class="dot blue"></span><strong id="turn-text">Blue to move</strong></div>
+        <div id="mode-text" class="muted small"></div>
+        <div id="think-text" class="muted small" hidden>The computer is thinking.</div>
+        <div id="stagnation-text" class="notice" hidden></div>
+      </div>
+      <div class="card">
+        <h2>Next game</h2>
+        <div class="seg" role="group" aria-label="Opponent">
+          <button type="button" data-mode="cpu" class="active">Computer</button>
+          <button type="button" data-mode="two">Two players</button>
+        </div>
+        <div class="row" id="cpu-options">
+          <label>Play as
+            <select id="color-select">
+              <option value="0">blue, moves first</option>
+              <option value="1">red</option>
+            </select>
+          </label>
+          <label>Level
+            <select id="level-select">
+              <option value="easy">easy</option>
+              <option value="medium" selected>medium</option>
+              <option value="hard">hard</option>
+            </select>
+          </label>
+        </div>
+        <button id="new-game" class="primary" type="button" style="margin-top:0.7rem">New game</button>
+      </div>
+      <div class="card">
+        <h2>Pieces</h2>
+        <table class="counts" id="counts"></table>
+      </div>
+      <div class="card">
+        <h2>Tools</h2>
+        <div class="stack">
+          <label class="row">Rings
+            <select id="rings-select">
+              <option value="off">off</option>
+              <option value="0">from blue's corner</option>
+              <option value="1">from red's corner</option>
+            </select>
+          </label>
+          <div class="row">
+            <button id="undo-btn" type="button">Undo</button>
+            <button id="resign-btn" type="button">Resign</button>
+            <button id="copy-btn" type="button">Copy moves</button>
+            <button id="load-btn" type="button">Load moves</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Moves</h2>
+        <ol id="move-list" class="moves-list"></ol>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<section id="view-rules" class="view" hidden>
+  <h1>How to play</h1>
+  <p class="lead">Intransitive was designed by webgoatguy. The whole rulebook fits on this page, and a first game takes about ten minutes.</p>
+
+  <div class="prose">
+    <h2>The board</h2>
+    <p>The board is nine squares by nine. Blue's home corner is a1 at the bottom left and red's is i9 at the top right. Each side starts with ten pieces: three rocks, four papers and three scissors, arranged in three diagonal rows with the scissors closest to the middle. Blue moves first.</p>
+  </div>
+  <div class="figure-row">
+    <figure><div data-diagram="start"></div><figcaption></figcaption></figure>
+  </div>
+
+  <div class="prose">
+    <h2>Moving</h2>
+    <p>On your turn you must move exactly one of your pieces one square in any direction: sideways, up and down, or diagonally. Every piece moves the same way. Passing is not allowed.</p>
+  </div>
+  <div class="figure-row">
+    <figure><div data-diagram="movement"></div><figcaption></figcaption></figure>
+  </div>
+
+  <div class="prose">
+    <h2>Capturing</h2>
+    <p>Rock captures scissors, scissors captures paper, and paper captures rock. To capture, move your piece onto an enemy piece it beats, and the enemy piece is removed. You can never move onto one of your own pieces, and you can never move onto an enemy piece your piece does not beat, which includes an enemy piece of the same type. Those squares are simply unavailable.</p>
+    <p>There are no ties and no bounces. A rock next to a rock just sits there.</p>
+  </div>
+  <div class="figure-row">
+    <figure><div data-diagram="captures"></div><figcaption></figcaption></figure>
+  </div>
+
+  <div class="prose">
+    <h2>Winning</h2>
+    <p>The first player to move any piece into the opponent's home corner wins. Blue is aiming for i9 and red is aiming for a1. It does not matter which piece gets there, and capturing into the corner counts.</p>
+    <p>Because a piece can only be captured by the type that beats it, a piece sitting in its own corner is a wall against two of the three enemy types. That is the basis of passive defence, which comes up a lot in the <a href="#strategy">strategy notes</a>.</p>
+  </div>
+  <div class="figure-row">
+    <figure><div data-diagram="goal"></div><figcaption></figcaption></figure>
+    <figure><div data-diagram="blocked"></div><figcaption></figcaption></figure>
+  </div>
+
+  <div class="prose">
+    <h2>Two rules you will rarely need</h2>
+    <ul class="rule-list">
+      <li><strong>No stalemate.</strong> If it is your turn and you have no legal move, you lose immediately. In practice this almost only happens when you have no pieces left.</li>
+      <li><strong>Stagnation.</strong> If 100 moves go by with no capture at all, the game is a draw. There is no draw by repetition. Most games are decided well before move 50, so this rule mostly matters against very defensive opponents.</li>
+    </ul>
+  </div>
+  <div class="figure-row">
+    <figure><div data-diagram="nomoves"></div><figcaption></figcaption></figure>
+  </div>
+
+  <div class="prose">
+    <h2>Notation</h2>
+    <p>Moves are written as the starting square, a dash or an x for a capture, and the destination, so <code>c5-d6</code> is a quiet move and <code>d6xd7</code> is a capture. Moves are numbered in pairs the way chess does it. The move list on the play page uses this format, and the copy and load buttons let you move games between this site and the official one.</p>
+  </div>
+</section>
+
+<section id="view-strategy" class="view" hidden>
+  <h1>Strategy notes</h1>
+  <p class="lead">A summary of the ideas in webgoatguy's <a href="https://www.youtube.com/watch?v=LO_zcGNJriA">How To Play &amp; Basic Strategy</a> video, with diagrams you can check against the board. Watch the video for the worked games; this page is the reference card.</p>
+
+  <div class="prose">
+    <h2>Three kinds of advantage</h2>
+    <p><strong>Material</strong> is the simple one: more pieces than the other side. It is exactly as good as it sounds.</p>
+    <p><strong>Position</strong> comes in two sizes. Macro position means your pieces are closer to the enemy corner than theirs are to yours. A cramped opponent has fewer useful moves, and more importantly the endgame is a race, so trading down into an endgame favours whoever is already further forward. Micro position is about where pieces stand relative to each other: an isolated enemy scissors with your rock nearby is a target, and a fork is a piece attacking two things at once.</p>
+    <p><strong>Matchup</strong> is the one that is unique to this game. Each of your piece types is only worth something if the enemy has pieces it can capture, and each enemy type is only dangerous if you have pieces it can capture. A side with a single scissors against several enemy papers is in trouble, because one scissors can only answer one paper at a time. Two papers attacking two different places will break through. In general a balanced distribution is the safest, but the right distribution depends on what the other side has left, and it is worth counting the pieces on both sides every few moves.</p>
+    <p>Whoever holds two of the three advantages usually wins.</p>
+  </div>
+  <div class="figure-row">
+    <figure><div data-diagram="matchup"></div><figcaption></figcaption></figure>
+  </div>
+
+  <div class="prose">
+    <h2>Rings</h2>
+    <p>Draw the squares that are one move from a corner, then two, then three. Each of those L-shaped bands is a ring, and every square on a ring is the same number of moves from the corner. Because pieces move like kings, the ring number is the only distance that matters. The rings option on the play page paints them on the board for either corner.</p>
+  </div>
+  <div class="figure-row">
+    <figure><div data-diagram="rings"></div><figcaption></figcaption></figure>
+  </div>
+
+  <div class="prose">
+    <h2>Passive and active defence</h2>
+    <p>Sooner or later an enemy piece slips past your pieces and starts running for your corner. You have two ways to stop it.</p>
+    <p>A <strong>passive defence</strong> puts a piece in your own corner that the runner cannot capture, which means a piece of the same type or the type that beats it. The runner is still alive and still a threat, but it cannot finish. The rule is simple: you have to reach the corner first, so you have to stay ahead of the runner in rings. If the runner is on ring 5 and it is your move, your blocker needs to step onto ring 4 now, then ring 3 when the runner reaches ring 4, and so on. Do that and you will always arrive first, unless one of your own pieces is standing in the way.</p>
+    <p>An <strong>active defence</strong> uses the piece type that beats the runner and simply captures it. The same ring rule mostly applies, with one bit of extra slack: a defender that is one ring behind the runner can still catch it if both are on the same side of the ring, because it can shadow the runner along the edge. From the other side of the ring it never catches up.</p>
+  </div>
+  <div class="figure-row">
+    <figure><div data-diagram="passive"></div><figcaption></figcaption></figure>
+    <figure><div data-diagram="active"></div><figcaption></figcaption></figure>
+    <figure><div data-diagram="sides"></div><figcaption></figcaption></figure>
+  </div>
+
+  <div class="prose">
+    <h2>Trades</h2>
+    <p>Each side starts with four papers but only three rocks and three scissors, so losing a paper costs less than losing a rock or a scissors. A trade that leaves you with three of each and your opponent with a hole in their distribution is a good trade even at equal material. A trade that leaves you with one scissors is usually a bad one, unless you get real position out of it. When an opponent offers a trade, ask what the counts look like afterwards before you accept.</p>
+    <p>The extreme case is a sacrifice for matchup: if you have no scissors at all, every enemy paper is immortal, and a lone immortal paper can beat three pieces in the endgame.</p>
+
+    <h2>Traps and tempo</h2>
+    <p>A piece with no safe squares is as good as captured, and you do not have to collect it right away. Two moves is a lot in this game, since two moves is often enough to win outright, so leave a trapped piece where it is and spend the moves on an attack instead. The same logic runs the other way: when your pieces are scattered and several are isolated, retreat and regroup before your opponent starts collecting them.</p>
+  </div>
+  <div class="figure-row">
+    <figure><div data-diagram="trap"></div><figcaption></figcaption></figure>
+  </div>
+
+  <div class="prose">
+    <h2>Endgames</h2>
+    <p>Once the board thins out, macro position and matchup decide almost everything, and the variety is enormous. One rock, one paper and one scissors against two rocks and one paper plays nothing like two papers against a rock and a scissors. A common pattern for the stronger side is to park one piece in the home corner as a permanent block and walk the others forward. The video's author has played around fifty games and says no two endgames have looked alike.</p>
+    <p>If you want to test any of this, the <a href="#puzzles">puzzles</a> page has positions built around these ideas, and the computer on the play page uses the same three advantages in its evaluation.</p>
+  </div>
+</section>
+
+<section id="view-puzzles" class="view" hidden>
+  <h1>Puzzles</h1>
+  <p class="lead">Short positions built around the defensive ideas in the strategy notes. Each one has a single decisive idea. Click a piece, then a square.</p>
+  <div class="puzzle-layout">
+    <div class="board-wrap">
+      <div id="puzzle-board" aria-label="Puzzle board"></div>
+    </div>
+    <aside class="panel">
+      <div class="card">
+        <div class="puzzle-nav" id="puzzle-nav"></div>
+        <h3 id="puzzle-title" style="margin-top:0.4rem"></h3>
+        <p id="puzzle-turn" class="muted small"></p>
+        <p id="puzzle-prompt"></p>
+        <div id="puzzle-feedback" class="feedback" aria-live="polite"></div>
+        <div class="row" style="margin-top:0.7rem">
+          <button id="puzzle-hint" type="button">Hint</button>
+          <button id="puzzle-reset" type="button">Reset</button>
+          <button id="puzzle-solution" type="button">Show solution</button>
+          <button id="puzzle-next" class="primary" type="button">Next</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<section id="view-about" class="view" hidden>
+  <h1>About</h1>
+  <p class="lead">Intransitive was designed by webgoatguy. This is a fan-made site for playing it offline and learning the strategy. It is not affiliated with the designer.</p>
+
+  <div class="prose">
+    <h2>The video</h2>
+    <p>Everything on the rules and strategy pages comes from this video, which also walks through three full games.</p>
+  </div>
+  <div class="video">
+    <iframe src="https://www.youtube-nocookie.com/embed/LO_zcGNJriA" title="Intransitive - How To Play and Basic Strategy" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+  </div>
+
+  <div class="prose">
+    <h2>Play online</h2>
+    <p>For rated games against other people, tournaments, and an analysis workshop, use the official site built by Meaf. The community Discord is where tournaments are announced and strategy gets argued about.</p>
+  </div>
+  <div class="links">
+    <a class="card" href="https://meaf.us/rps2/"><strong>Official site</strong><span class="muted small">meaf.us/rps2, online play with accounts, ratings and tournaments</span></a>
+    <a class="card" href="https://discord.gg/davyn6EWA2"><strong>Community Discord</strong><span class="muted small">Discussion, games and tournament announcements</span></a>
+    <a class="card" href="https://www.youtube.com/@webgoatguy"><strong>webgoatguy on YouTube</strong><span class="muted small">The designer's channel, including the video on how the game was designed</span></a>
+  </div>
+
+  <div class="prose">
+    <h2>About this site</h2>
+    <p>The site is plain HTML, CSS and JavaScript with no build step, and it runs entirely in your browser. The rules engine follows the official implementation exactly, including the no-stalemate rule and the draw after 100 moves without a capture, and it uses the same move notation, so games can be copied between the two sites.</p>
+    <p>The computer opponent is an alpha-beta search that runs in a background thread. Its evaluation is a direct translation of the video's advice: it counts material, penalises lopsided distributions, rewards pieces that are closer to the enemy corner, and checks whether any runner can still be stopped using the ring rule. Easy looks two moves ahead and makes deliberate mistakes, medium looks four moves ahead, and hard searches as deep as it can in about two seconds. The puzzle solutions were checked with the same search.</p>
+    <p>Source code is on <a href="https://github.com/MathMaster1296/intransitive">GitHub</a> under the MIT licence. If you find a rules mismatch with the official site, open an issue.</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Game by webgoatguy. Site by <a href="https://github.com/MathMaster1296">Pratham Ukewar</a>.
+</footer>
+
+<dialog id="load-dialog">
+  <form method="dialog">
+    <h2>Load moves</h2>
+    <p class="small muted">Paste a move list in the same notation as the official site, for example <code>1. c5-d6 e8-d7 2. d6xd7</code>. The game is replayed from the start.</p>
+    <textarea id="load-text" spellcheck="false"></textarea>
+    <div class="error" id="load-error"></div>
+    <div class="row" style="margin-top:0.6rem">
+      <button type="button" id="load-cancel">Cancel</button>
+      <button type="button" id="load-confirm" class="primary">Load</button>
+    </div>
+  </form>
+</dialog>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
