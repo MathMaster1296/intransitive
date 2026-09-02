@@ -240,3 +240,60 @@ test('a full game between two computer players ends legally', () => {
   assert.ok(['corner', 'no_moves', 'no_pieces', 'stagnation'].includes(game.result.reason));
   assert.ok(Math.abs(WIN) > 0);
 });
+
+import { attackedCells, encodeMoves, decodeMoves, boardAt } from '../js/engine.js';
+import { recordGame, recordPuzzle, BADGES } from '../js/stats.js';
+
+test('games can start from a custom position', () => {
+  const board = boardFrom({ blue: { S: ['h8'] }, red: { R: ['a3'] } });
+  const g = newGame(board, RED);
+  assert.equal(g.turn, RED);
+  assert.equal(g.start.turn, RED);
+  const next = play(g, packMove(parseCell('a3'), parseCell('a2')));
+  assert.equal(next.start.turn, RED);
+  assert.deepEqual(Array.from(boardAt(next, 0)), Array.from(board));
+  assert.equal(boardAt(next, 1), next.board);
+  const parsed = parseMoves('a3-a2 h8-i9', { board, turn: RED });
+  assert.deepEqual(parsed.result, { winner: BLUE, reason: 'corner' });
+});
+
+test('attacked cells lists pieces an adjacent enemy can capture', () => {
+  const board = boardFrom({ blue: { R: ['d4'], P: ['a1'] }, red: { S: ['e5'], P: ['d5'], R: ['h8'] } });
+  const cells = attackedCells(board).map(cellName).sort();
+  // the rock on d4 attacks the scissors on e5; the paper on d5 attacks the rock on d4
+  assert.deepEqual(cells, ['d4', 'e5']);
+});
+
+test('share links round trip and reject bad input', () => {
+  const g = parseMoves('1. c5-d6 e8-d7 2. d6xd7 f7-e6 3. d4-e5');
+  const code = encodeMoves(g);
+  assert.match(code, /^[a-z]+$/);
+  assert.equal(code.length, 10);
+  assert.equal(movesText(decodeMoves(code)), movesText(g));
+  assert.equal(decodeMoves('').moves.length, 0);
+  assert.throws(() => decodeMoves('zzz'), /not a valid game/);
+  assert.throws(() => decodeMoves('aaaa'), /not a valid game|illegal/);
+});
+
+test('stats record games, rating and badges', () => {
+  const stats = {
+    games: 0, wins: 0, losses: 0, draws: 0,
+    byLevel: { easy: { w: 0, l: 0, d: 0 }, medium: { w: 0, l: 0, d: 0 }, hard: { w: 0, l: 0, d: 0 } },
+    streak: 0, bestStreak: 0, rating: 1000, ratedGames: 0, badges: {}, puzzles: {}, history: [],
+  };
+  const r1 = recordGame(stats, { level: 'hard', outcome: 'win', moves: 18, rated: true, piecesLost: 0, maxDeficit: 0, opponentScissorsOut: false });
+  assert.ok(r1.delta > 0);
+  assert.equal(stats.wins, 1);
+  assert.equal(stats.rating, 1000 + r1.delta);
+  const ids = r1.earned.map((b) => b.id).sort();
+  assert.deepEqual(ids, ['first-win', 'flawless', 'hard-win', 'sprint']);
+  const r2 = recordGame(stats, { level: 'easy', outcome: 'loss', moves: 30, rated: false, piecesLost: 5, maxDeficit: 3, opponentScissorsOut: false });
+  assert.equal(r2.delta, 0);
+  assert.equal(stats.streak, 0);
+  assert.equal(stats.losses, 1);
+  const p = recordPuzzle(stats, 'race', 2);
+  assert.deepEqual(p, []);
+  const p2 = recordPuzzle(stats, 'tempo', 2);
+  assert.equal(p2[0].id, 'puzzles');
+  assert.ok(BADGES.length >= 8);
+});

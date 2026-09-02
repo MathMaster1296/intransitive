@@ -237,16 +237,45 @@ export function notation(board, m) {
   return cellName(from) + (board[to] ? 'x' : '-') + cellName(to);
 }
 
-// A game is an immutable record. `play` returns a new game.
-export function newGame() {
+// A game is an immutable record. `play` returns a new game. A game can start
+// from any position, which the puzzles and the tutorial use.
+export function newGame(board = startingBoard(), turn = BLUE) {
   return {
-    board: startingBoard(),
-    turn: BLUE,
+    start: { board: new Uint8Array(board), turn },
+    board: new Uint8Array(board),
+    turn,
     moves: [],
     boards: [],
     sinceCapture: 0,
     result: null,
   };
+}
+
+// Board after the first `n` plies of the game (n = moves.length is the
+// current board).
+export function boardAt(game, n) {
+  if (n >= game.moves.length) return game.board;
+  return game.boards[n].board;
+}
+
+// Which pieces are attacked: a piece is attacked when an adjacent enemy piece
+// beats it. Returns an array of cell indexes.
+export function attackedCells(board) {
+  const out = [];
+  for (let i = 0; i < CELLS; i++) {
+    const v = board[i];
+    if (!v) continue;
+    const owner = ownerOf(v);
+    const type = typeOf(v);
+    for (const n of NEIGHBORS[i]) {
+      const w = board[n];
+      if (w && ownerOf(w) !== owner && beats(typeOf(w), type)) {
+        out.push(i);
+        break;
+      }
+    }
+  }
+  return out;
 }
 
 export function play(game, m) {
@@ -275,6 +304,7 @@ export function play(game, m) {
   }
 
   return {
+    start: game.start,
     board,
     turn: opponent,
     moves: game.moves.concat([{ m, capture, notation: notation(game.board, m), player }]),
@@ -288,6 +318,7 @@ export function undo(game) {
   if (!game.moves.length) return game;
   const prev = game.boards[game.boards.length - 1];
   return {
+    start: game.start,
     board: prev.board,
     turn: 1 - game.turn,
     moves: game.moves.slice(0, -1),
@@ -328,9 +359,9 @@ const RESULT_RE = /^(1-0|0-1|0-0)\.?$/;
 
 // Rebuild a game from pasted move text. Throws with a readable message on the
 // first token that does not work.
-export function parseMoves(text) {
+export function parseMoves(text, start = null) {
   const tokens = String(text || '').trim().split(/\s+/).filter(Boolean);
-  let game = newGame();
+  let game = start ? newGame(start.board, start.turn) : newGame();
   for (const raw of tokens) {
     if (NUMBER_RE.test(raw) || RESULT_RE.test(raw) || raw === '.') continue;
     const mt = MOVE_RE.exec(raw);
@@ -365,4 +396,50 @@ export function describeResult(result) {
     default:
       return 'Game over.';
   }
+}
+
+// Compact move encoding for share links: two lowercase letters per ply. The
+// first letter pair encodes the origin cell and the direction of the step.
+const LETTERS = 'abcdefghijklmnopqrstuvwxyz';
+const DIRS = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
+
+export function encodeMoves(game) {
+  let out = '';
+  for (const mv of game.moves) {
+    const from = moveFrom(mv.m);
+    const to = moveTo(mv.m);
+    const dc = col(to) - col(from);
+    const dr = row(to) - row(from);
+    const dir = DIRS.findIndex(([a, b]) => a === dc && b === dr);
+    const code = from * 8 + dir;
+    out += LETTERS[(code / 26) | 0] + LETTERS[code % 26];
+  }
+  return out;
+}
+
+// Replays an encoded move string from the standard opening. Throws when the
+// string does not describe a legal game.
+export function decodeMoves(text) {
+  const s = String(text || '');
+  if (s.length % 2 !== 0) throw new Error('That link is not a valid game.');
+  let game = newGame();
+  for (let i = 0; i < s.length; i += 2) {
+    const a = LETTERS.indexOf(s[i]);
+    const b = LETTERS.indexOf(s[i + 1]);
+    if (a < 0 || b < 0) throw new Error('That link is not a valid game.');
+    const code = a * 26 + b;
+    const from = (code / 8) | 0;
+    const [dc, dr] = DIRS[code % 8];
+    const c = col(from) + dc;
+    const r = row(from) + dr;
+    if (from >= CELLS || c < 0 || c >= SIZE || r < 0 || r >= SIZE) throw new Error('That link is not a valid game.');
+    const to = index(c, r);
+    if (game.result) throw new Error('That link has moves after the game ended.');
+    const v = game.board[from];
+    if (!v || ownerOf(v) !== game.turn || !canMove(game.board, from, to)) {
+      throw new Error('That link contains an illegal move.');
+    }
+    game = play(game, packMove(from, to));
+  }
+  return game;
 }

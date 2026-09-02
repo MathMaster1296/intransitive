@@ -2,8 +2,8 @@
 
 A browser version of Intransitive, the nine by nine strategy game designed by
 webgoatguy where rock, paper and scissors pieces race for the far corner.
-Play against the computer or a friend, read the rules, work through the
-strategy notes from the designer's video, and try the puzzles.
+Play the computer or a friend, learn the rules on the board, read the
+strategy notes from the designer's video, and solve the puzzles.
 
 **Live at [mathmaster1296.github.io/intransitive](https://mathmaster1296.github.io/intransitive/).**
 
@@ -25,16 +25,25 @@ captures is a draw.
 
 - A rules engine that matches the official implementation, including the
   edge cases, and uses the same move notation, so games can be copied
-  between the two sites with the copy and load buttons.
-- A computer opponent with three levels. It is an alpha-beta search with a
+  between the two sites.
+- A computer opponent with three levels: an alpha-beta search with a
   capture-only quiescence search, running in a Web Worker. The evaluation
   is the video's advice written down: material, matchup (a side with no
   scissors cannot ever capture a paper), distance to the enemy corner, and
   a ring-rule check for runners that can no longer be stopped.
-- Rules and strategy pages with board diagrams, and a rings overlay on the
-  play page for counting distances the way the video does.
-- Three puzzles whose solutions were checked with the search.
-- Light and dark themes, and the current game survives a page refresh.
+- Drag and drop or click to move, an evaluation bar, move ratings (best,
+  good, inaccuracy, mistake, blunder), hints with an arrow, a threats
+  overlay, a rings overlay, board flipping, and move-by-move review.
+- A one-minute interactive tutorial, a home page demo game, rules and
+  strategy pages with diagrams, and tips from the video on the play page.
+- Puzzles with one decisive idea each, all checked with the search, a
+  featured daily puzzle, and a button to play any puzzle position out
+  against the computer.
+- A local rating, win-loss record, streaks and badges, stored only in your
+  browser.
+- Share links that replay a whole game, sound effects, confetti, keyboard
+  shortcuts, light and dark themes, and offline support as an installable
+  web app.
 
 ## Run it locally
 
@@ -57,14 +66,23 @@ node --test test/test.mjs
 ## Layout
 
 ```
-index.html       the whole site, five sections switched by the URL hash
+index.html         the whole site, six sections switched by the URL hash
 css/style.css
-js/engine.js     rules, move generation, notation, game records
-js/ai.js         evaluation and search
-js/worker.js     runs the search off the main thread
-js/board.js      board rendering for the game, diagrams and puzzles
-js/lessons.js    diagram positions and puzzle definitions
-js/app.js        UI, routing, persistence
+js/engine.js       rules, move generation, notation, share-link encoding
+js/ai.js           evaluation and search
+js/worker.js       runs the search off the main thread
+js/analysis.js     engine channels for moves, hints and evaluation
+js/board.js        board rendering, drag and drop, arrows, animations
+js/game.js         the play page
+js/puzzles.js      the puzzles page
+js/tutorial.js     the guided tutorial
+js/home.js         the demo game on the home page
+js/lessons.js      diagram positions, puzzles, tutorial steps, tips
+js/stats.js        rating, record and badges
+js/sound.js        synthesised sound effects
+js/fx.js           confetti
+js/app.js          routing, theme, dialogs, boot
+sw.js              offline cache
 test/test.mjs
 ```
 

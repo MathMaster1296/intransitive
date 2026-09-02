@@ -124,6 +124,17 @@ export const PUZZLES = [
     wrong: 'That gives red a free move, and red uses it to start walking its rock to i9. The trapped scissors is not going anywhere. Start the race instead.',
   },
   {
+    id: 'boxed',
+    title: 'Box it in',
+    spec: { blue: { R: ['a8', 'b9', 'c8'] }, red: { R: ['a9'] } },
+    turn: BLUE,
+    prompt: 'Red is down to one piece, a rock in the top-left corner, and blue has no paper to capture it with. Win right now.',
+    hint: 'A rock cannot move onto a rock. What happens to a player who has no legal move at all?',
+    solutions: ['c8-b8'],
+    explain: 'After c8-b8 the red rock has nowhere to go: a8, b8 and b9 are all blue rocks. There is no stalemate in this game, so a player with no legal move loses on the spot. Walking a rock to i9 would win too, but four moves later.',
+    wrong: 'That wins eventually, but there is a one-move win. Take away the red rock\'s last square.',
+  },
+  {
     id: 'side',
     title: 'One ring behind',
     spec: { blue: { P: ['e4'], R: ['b6'], S: ['a8'] }, red: { R: ['d2'], P: ['h9'] } },
@@ -135,3 +146,64 @@ export const PUZZLES = [
     wrong: 'The red rock reaches a1 before that piece can do anything about it. The paper is one ring behind but on the same side, which is enough if it attacks right away.',
   },
 ];
+
+// Guided tutorial played on a small board inside a dialog.
+export const TUTORIAL = [
+  {
+    title: 'Move a piece',
+    text: 'Every piece moves one square in any direction, like a king in chess. Click the blue paper and then a highlighted square, or just drag it.',
+    spec: { blue: { P: ['d4'] }, red: { R: ['h8'] } },
+    turn: BLUE,
+    accept: 'any',
+    done: 'That is the only way anything moves. No jumping, no sliding.',
+  },
+  {
+    title: 'Capture',
+    text: 'Rock beats scissors, scissors beats paper, paper beats rock. Take the red scissors on e5 with your rock.',
+    spec: { blue: { R: ['d4'] }, red: { S: ['e5'], P: ['h8'] } },
+    turn: BLUE,
+    accept: ['d4xe5'],
+    done: 'Captured. A piece can only ever be taken by the one type that beats it.',
+  },
+  {
+    title: 'Walls',
+    text: 'Paper cannot take paper, so the red paper on i9 is a wall for your paper on h8. Your scissors on h9 is another story. Win the game.',
+    spec: { blue: { P: ['h8'], S: ['h9'] }, red: { P: ['i9'], R: ['b2'] } },
+    turn: BLUE,
+    accept: ['h9xi9'],
+    done: 'That is a win. Any piece reaching the far corner ends the game on the spot, and capturing into it counts.',
+  },
+  {
+    title: 'Defend your corner',
+    text: 'Now the other way round. Red\'s paper on b2 is one step from your corner. Put your own paper on a1 so it has nowhere to go.',
+    spec: { blue: { P: ['a2'], R: ['g7'] }, red: { P: ['b2'], S: ['h9'] } },
+    turn: BLUE,
+    accept: ['a2-a1'],
+    done: 'Blocked. A piece in its own corner stops everything it does not lose to. That idea, and counting how far each runner is from the corner, is most of the strategy.',
+  },
+  {
+    title: 'You are ready',
+    text: 'That is the whole game. Blue moves first, no legal moves means you lose, and 100 moves without a capture is a draw. Go play the computer, and turn on Threats if you want the board to show you what is under attack.',
+    spec: null,
+    finish: true,
+  },
+];
+
+// Tips shown on the play page, all taken from the strategy video.
+export const TIPS = [
+  'Count the pieces on both sides every few moves. One scissors against three enemy papers is losing even when material is equal.',
+  'Every square on a ring is the same number of moves from the corner. A defender has to stay ahead of the runner in rings, or it arrives second.',
+  'Two moves is a lot. A trapped piece can wait; an attack on the corner cannot.',
+  'You start with four papers and only three rocks and three scissors, so losing a paper hurts least.',
+  'A piece sitting in your own corner blocks two of the three enemy types. Only the type that beats it can get through.',
+  'An active defence captures the runner. A passive defence only blocks it. Capture when you can.',
+  'A defender one ring behind can still catch a runner if both are on the same side of the ring.',
+  'Trading into an endgame favours whoever is already closer to the enemy corner.',
+  'Scattered pieces get picked off one at a time. When you are spread thin, retreat and regroup first.',
+  'If the enemy has no scissors left, your papers can never be captured. Sometimes a sacrifice is worth that.',
+  'A piece that attacks two enemy pieces it beats will usually win one of them. Look for forks.',
+  'Before accepting a trade, picture the piece counts afterwards. Balanced beats lopsided.',
+];
+
+// A computer versus computer game replayed on the home page.
+export const DEMO_MOVES = '1. d4-d5 e7-d7 2. c3-d4 d7-c6 3. c5-b6 f8-e7 4. b4-c5 c6xb5 5. c5xb5 e7-e6 6. d4-e5 e6xd5 7. e5xf6 f7xf6 8. c4xd5 g5-f5 9. d2-c3 e8-e7 10. c3-d4 f6-e5 11. d4-c4 f5-e6 12. b6-c5 e7-f7 13. c5-d6 g7-f6 14. b5-c6 h6-g7 15. c6-d7 e6xd5 16. c4xd5 f7-e7 17. e3-d4 e7xd7 18. d3-e4 e5xd5 19. e4-e5 d5-c4 20. d4xc4 f6-e6 21. e5xe6 g7-h7 22. e6-f7 g6-g7 23. f7-g8 g7-h8 24. g8xh7 d7-c6 25. d6-e5 c6-b5 26. e5-f6 b5-a4 27. f6-g7 h8-i7 28. g7-h8 h5-i5 29. h8-i9 1-0';
