@@ -75,15 +75,17 @@ export function evaluate(board, me) {
     cnt[p][t]++;
     const d = DIST_TO_GOAL[p][i];
     if (d < minD[p]) minD[p] = d;
-    let s = 100 + (8 - d) * 3;
+    // Every ring closer to the enemy corner is worth a little, and the last
+    // few rings are worth a lot more: that is where races are decided.
+    let s = 100 + (8 - d) * 5 + (d <= 3 ? (4 - d) * 10 : 0);
     // A piece next to an enemy that beats it is in trouble; a piece next to
     // an enemy it beats is applying pressure.
     for (const n of NEIGHBORS[i]) {
       const w = board[n];
       if (!w || ownerOf(w) === p) continue;
       const tw = typeOf(w);
-      if (beats(tw, t)) s -= 6;
-      else if (beats(t, tw)) s += 4;
+      if (beats(tw, t)) s -= 8;
+      else if (beats(t, tw)) s += 9;
     }
     score += p === me ? s : -s;
   }
@@ -99,7 +101,7 @@ export function evaluate(board, me) {
       if (mine === 0) score -= sign * 45 * targets;
       else if (mine === 1 && targets >= 2) score -= sign * 14 * (targets - 1);
     }
-    score += sign * (8 - minD[p]) * 8;
+    score += sign * (8 - minD[p]) * 14;
   }
 
   const myRun = unstoppableRunner(board, me, true);
@@ -166,6 +168,7 @@ class Searcher {
     this.checkTime();
     const stand = evaluate(this.board, player);
     if (depth === 0 || stand >= beta) return stand;
+    let best = stand;
     if (stand > alpha) alpha = stand;
     const moves = this.generate(player, true);
     for (const m of moves) {
@@ -179,11 +182,12 @@ class Searcher {
       const score = -this.quiesce(-beta, -alpha, 1 - player, ply + 1, depth - 1);
       board[from] = board[to];
       board[to] = captured;
-      if (this.aborted) return alpha;
+      if (this.aborted) return best;
+      if (score > best) best = score;
       if (score >= beta) return score;
       if (score > alpha) alpha = score;
     }
-    return alpha;
+    return best;
   }
 
   negamax(depth, alpha, beta, player, ply, sinceCapture, first) {
@@ -259,6 +263,9 @@ export function search(board, player, sinceCapture = 0, options = {}) {
 
   for (let depth = 1; depth <= maxDepth; depth++) {
     const ordered = s.order(rootMoves, player, best);
+    // `alpha` tracks the best exact score so far. Moves are searched with a
+    // window widened by the noise, so any move that could still win the
+    // jittered comparison gets an exact score rather than a bound.
     let alpha = -Infinity;
     let iterBest = null;
     let iterScore = -Infinity;
@@ -268,16 +275,17 @@ export function search(board, player, sinceCapture = 0, options = {}) {
       const captured = board2[to];
       board2[to] = board2[from];
       board2[from] = 0;
-      let score = -s.negamax(depth - 1, -Infinity, -alpha, 1 - player, 1, captured ? 0 : sinceCapture + 1, 0);
+      const beta = alpha === -Infinity ? Infinity : -(alpha - 2 * noise - 1);
+      const raw = -s.negamax(depth - 1, -Infinity, beta, 1 - player, 1, captured ? 0 : sinceCapture + 1, 0);
       board2[from] = board2[to];
       board2[to] = captured;
       if (s.aborted) break;
-      score += jitter.get(m);
+      if (raw > alpha) alpha = raw;
+      const score = raw + jitter.get(m);
       if (score > iterScore) {
         iterScore = score;
         iterBest = m;
       }
-      if (score > alpha) alpha = score;
     }
     if (s.aborted) break;
     best = iterBest;
