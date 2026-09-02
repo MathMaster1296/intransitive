@@ -351,12 +351,14 @@ export function createBoard(root, options = {}) {
       }
     }
 
-    let handledAt = 0;
+    // The browser fires a click right after the pointerup that already
+    // handled a piece; remember it so that click is not processed twice.
+    let handled = { cell: -1, at: 0 };
 
     grid.addEventListener('pointerup', (e) => {
-      const wasDrag = !!drag;
+      const wasDrag = drag ? drag.from : -1;
       endDrag(e, false);
-      if (wasDrag) handledAt = Date.now();
+      if (wasDrag >= 0) handled = { cell: wasDrag, at: Date.now() };
     });
     grid.addEventListener('pointercancel', (e) => endDrag(e, true));
 
@@ -365,8 +367,8 @@ export function createBoard(root, options = {}) {
     grid.addEventListener('click', (e) => {
       const cell = e.target.closest('.cell');
       if (!cell) return;
-      if (Date.now() - handledAt < 500) return;
       const i = Number(cell.dataset.cell);
+      if (i === handled.cell && Date.now() - handled.at < 400) return;
       if (onCell) onCell(i, { click: true });
     });
 
