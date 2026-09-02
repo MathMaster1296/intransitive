@@ -189,7 +189,7 @@ export const TUTORIAL = [
   },
 ];
 
-// Tips shown on the play page, all taken from the strategy video.
+// Tips shown on the play page.
 export const TIPS = [
   'Count the pieces on both sides every few moves. One scissors against three enemy papers is losing even when material is equal.',
   'Every square on a ring is the same number of moves from the corner. A defender has to stay ahead of the runner in rings, or it arrives second.',

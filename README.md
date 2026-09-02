@@ -1,16 +1,15 @@
 # intransitive
 
-A browser version of Intransitive, the nine by nine strategy game designed by
-webgoatguy where rock, paper and scissors pieces race for the far corner.
-Play the computer or a friend, learn the rules on the board, read the
-strategy notes from the designer's video, and solve the puzzles.
+A browser version of Intransitive, the nine by nine strategy game where
+rock, paper and scissors pieces race for the far corner. Play the computer
+or a friend, learn the rules on the board, read the strategy notes, and
+solve the puzzles.
 
 **Live at [mathmaster1296.github.io/intransitive](https://mathmaster1296.github.io/intransitive/).**
 
-This is a fan-made site. The official site, with online play, ratings and
-tournaments, is [meaf.us/rps2](https://meaf.us/rps2/), built by Meaf. The
-rules and all of the strategy material come from webgoatguy's video
-[Intransitive - How To Play & Basic Strategy](https://www.youtube.com/watch?v=LO_zcGNJriA).
+This is a fan-made site and is not affiliated with the game's designer. The
+official site, with online play, ratings and tournaments, is
+[meaf.us/rps2](https://meaf.us/rps2/), built by Meaf.
 
 ## The game
 
@@ -28,14 +27,14 @@ captures is a draw.
   between the two sites.
 - A computer opponent with three levels: an alpha-beta search with a
   capture-only quiescence search, running in a Web Worker. The evaluation
-  is the video's advice written down: material, matchup (a side with no
+  is the game's strategy advice written down: material, matchup (a side with no
   scissors cannot ever capture a paper), distance to the enemy corner, and
   a ring-rule check for runners that can no longer be stopped.
 - Drag and drop or click to move, an evaluation bar, move ratings (best,
   good, inaccuracy, mistake, blunder), hints with an arrow, a threats
   overlay, a rings overlay, board flipping, and move-by-move review.
 - A one-minute interactive tutorial, a home page demo game, rules and
-  strategy pages with diagrams, and tips from the video on the play page.
+  strategy pages with diagrams, and strategy tips on the play page.
 - Puzzles with one decisive idea each, all checked with the search, a
   featured daily puzzle, and a button to play any puzzle position out
   against the computer.

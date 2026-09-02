@@ -70,7 +70,7 @@
 <section id="view-home" class="view">
   <div class="hero">
     <div>
-      <span class="eyebrow">A game by webgoatguy</span>
+      <span class="eyebrow">A board game you can learn in a minute</span>
       <h1>Rock, paper, scissors.<br>Now it is a board game.</h1>
       <p class="lead">Ten pieces each on a nine by nine board. Rock takes scissors, scissors takes paper, paper takes rock, and the first piece to reach the far corner wins.</p>
       <div class="cta">
@@ -204,7 +204,7 @@
 
 <section id="view-rules" class="view" hidden>
   <h1>How to play</h1>
-  <p class="lead">Intransitive was designed by webgoatguy. The whole rulebook fits on this page, and a first game takes about ten minutes. If you would rather learn on the board, the <button class="btn small" type="button" data-tutorial>one-minute tutorial</button> walks you through it.</p>
+  <p class="lead">The whole rulebook fits on this page, and a first game takes about ten minutes. If you would rather learn on the board, the <button class="btn small" type="button" data-tutorial>one-minute tutorial</button> walks you through it.</p>
 
   <div class="prose">
     <h2>The board</h2>
@@ -258,7 +258,7 @@
 
 <section id="view-strategy" class="view" hidden>
   <h1>Strategy notes</h1>
-  <p class="lead">This page collects the ideas from webgoatguy's <a href="https://www.youtube.com/watch?v=LO_zcGNJriA">How To Play &amp; Basic Strategy</a> video, with diagrams you can check against the board. Watch the video for the worked games. This page is the reference card.</p>
+  <p class="lead">The ideas on this page come from the game's own strategy guide, laid out here with diagrams you can check against the board. Think of it as the reference card.</p>
 
   <div class="prose">
     <h2>Three kinds of advantage</h2>
@@ -305,7 +305,7 @@
 
   <div class="prose">
     <h2>Endgames</h2>
-    <p>Once the board thins out, macro position and matchup decide almost everything, and the variety is enormous. One rock, one paper and one scissors against two rocks and one paper plays nothing like two papers against a rock and a scissors. A common pattern for the stronger side is to park one piece in the home corner as a permanent block and walk the others forward. webgoatguy has played around fifty games and says no two endgames have looked alike.</p>
+    <p>Once the board thins out, macro position and matchup decide almost everything, and the variety is enormous. One rock, one paper and one scissors against two rocks and one paper plays nothing like two papers against a rock and a scissors. A common pattern for the stronger side is to park one piece in the home corner as a permanent block and walk the others forward. Experienced players say that after dozens of games they have still never seen the same endgame twice.</p>
     <p>If you want to test any of this, the <a href="#puzzles">puzzles</a> page has positions built around these ideas, and the computer on the play page uses the same three advantages in its evaluation. Turn on Threats and Rings while you play to see the ideas on the board.</p>
   </div>
 </section>
@@ -349,30 +349,20 @@
 
 <section id="view-about" class="view" hidden>
   <h1>About</h1>
-  <p class="lead">Intransitive was designed by webgoatguy. This is a fan-made site for playing it and learning the strategy. It is not affiliated with the designer.</p>
-
-  <div class="prose">
-    <h2>The video</h2>
-    <p>Everything on the rules and strategy pages comes from this video, which also walks through three full games.</p>
-  </div>
-  <div class="video">
-    <iframe src="https://www.youtube-nocookie.com/embed/LO_zcGNJriA" title="Intransitive - How To Play and Basic Strategy" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe>
-  </div>
+  <p class="lead">This is a fan-made site for playing Intransitive and learning its strategy. It is not the official site and it is not affiliated with the game's designer.</p>
 
   <div class="prose">
     <h2>Play online</h2>
-    <p>For rated games against other people, tournaments, and an analysis workshop, use the official site built by Meaf. The community Discord is where tournaments are announced and strategy gets argued about.</p>
+    <p>For rated games against other people, tournaments, and an analysis workshop, use the official site built by Meaf.</p>
   </div>
   <div class="links">
     <a class="card" href="https://meaf.us/rps2/"><strong>Official site</strong><span class="muted small">meaf.us/rps2, online play with accounts, ratings and tournaments</span></a>
-    <a class="card" href="https://discord.gg/davyn6EWA2"><strong>Community Discord</strong><span class="muted small">Discussion, games and tournament announcements</span></a>
-    <a class="card" href="https://www.youtube.com/@webgoatguy"><strong>webgoatguy on YouTube</strong><span class="muted small">The designer's channel, including the video on how the game was designed</span></a>
   </div>
 
   <div class="prose">
     <h2>About this site</h2>
     <p>The site is plain HTML, CSS and JavaScript with no build step, and it runs entirely in your browser. The rules engine follows the official implementation exactly, including the no-stalemate rule and the draw after 100 moves without a capture, and it uses the same move notation, so games can be copied between the two sites. It works offline once it has loaded, and you can install it to your home screen.</p>
-    <p>The computer opponent is an alpha-beta search that runs in a background thread. Its evaluation is a direct translation of the video's advice: it counts material, penalises lopsided distributions, rewards pieces that are closer to the enemy corner, and checks whether any runner can still be stopped using the ring rule. Easy looks two moves ahead and makes deliberate mistakes, medium looks four moves ahead, and hard searches as deep as it can in about two seconds. The same search drives the evaluation bar, the hints, the move ratings and the puzzle checks.</p>
+    <p>The computer opponent is an alpha-beta search that runs in a background thread. Its evaluation is a direct translation of the strategy notes: it counts material, penalises lopsided distributions, rewards pieces that are closer to the enemy corner, and checks whether any runner can still be stopped using the ring rule. Easy looks two moves ahead and makes deliberate mistakes, medium looks four moves ahead, and hard searches as deep as it can in about two seconds. The same search drives the evaluation bar, the hints, the move ratings and the puzzle checks.</p>
     <p>Your games, stats and badges are stored in your browser only. Nothing is sent anywhere. Source code is on <a href="https://github.com/MathMaster1296/intransitive">GitHub</a> under the MIT licence. If you find a rules mismatch with the official site, open an issue.</p>
   </div>
 </section>
@@ -387,7 +377,7 @@
 </nav>
 
 <footer>
-  Game by webgoatguy. Site by <a href="https://github.com/MathMaster1296">Pratham Mukewar</a>. <a href="#about">About</a>
+  Site by <a href="https://github.com/MathMaster1296">Pratham Mukewar</a>. Not affiliated with the game's designer. <a href="#about">About</a>
 </footer>
 
 <dialog id="dlg-new">

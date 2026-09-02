@@ -1,7 +1,7 @@
 // Computer opponent: iterative deepening alpha-beta with a capture-only
-// quiescence search. The evaluation follows the ideas from webgoatguy's
-// strategy video: material, matchup (piece distribution), macro position
-// (rings from the corners), and a check for runners nobody can stop.
+// quiescence search. The evaluation follows the game's strategy notes:
+// material, matchup (piece distribution), macro position (rings from the
+// corners), and a check for runners nobody can stop.
 
 import {
   CELLS, GOAL, NEIGHBORS, STAGNATION_PLIES,
