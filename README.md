@@ -40,8 +40,11 @@ captures is a draw.
   there is a daily puzzle, a three-minute puzzle rush, and a button to play
   any position out against the computer. `node tools/verify.mjs` re-checks
   every shipped puzzle.
-- A local rating, win-loss record, streaks and badges, stored only in your
-  browser.
+- Ratings, all stored only in your browser: a provisional Elo against the
+  computer levels (with history and peak), a separate puzzle rating where
+  every puzzle carries its own rating and your first attempt moves yours,
+  and named player profiles for two-player games with their own Elo and a
+  local leaderboard. Plus win-loss records, streaks and badges.
 - Share links that replay a whole game, sound effects, confetti, keyboard
   shortcuts, light and dark themes, and offline support as an installable
   web app.

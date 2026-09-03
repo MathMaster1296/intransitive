@@ -381,3 +381,25 @@ test('puzzle ratings and first-attempt scoring', () => {
   assert.equal(stats.rushBest, 12);
   assert.equal(earned[0].id, 'rush-10');
 });
+
+import { getPlayer, recordTwoPlayerGame, leaderboard } from '../js/stats.js';
+
+test('two-player games rate both named players', () => {
+  const stats = { players: {}, lastNames: { blue: '', red: '' } };
+  const r = recordTwoPlayerGame(stats, 'Ann', 'Ben', 0, true);
+  assert.ok(r.blue > 0 && r.red < 0);
+  assert.equal(r.blue, -r.red);
+  assert.equal(getPlayer(stats, 'Ann').wins, 1);
+  assert.equal(getPlayer(stats, 'Ben').losses, 1);
+  const draw = recordTwoPlayerGame(stats, 'Ann', 'Ben', null, true);
+  assert.ok(draw.blue < 0 && draw.red > 0, 'a draw favours the lower-rated player');
+  const casual = recordTwoPlayerGame(stats, 'Ann', 'Ben', 1, false);
+  assert.equal(casual.blue, 0);
+  assert.equal(getPlayer(stats, 'Ben').wins, 1);
+  assert.equal(recordTwoPlayerGame(stats, 'Ann', 'Ann', 0, true), null);
+  assert.equal(recordTwoPlayerGame(stats, '', 'Ben', 0, true), null);
+  const lb = leaderboard(stats);
+  assert.equal(lb.length, 2);
+  assert.ok(lb[0].rating >= lb[1].rating);
+  assert.deepEqual(stats.lastNames, { blue: 'Ann', red: 'Ben' });
+});

@@ -142,6 +142,7 @@ function initNewGameDialog() {
       $('ng-mode').querySelectorAll('button').forEach((x) => x.classList.toggle('active', x === b));
       $('ng-color-field').hidden = ng.mode !== 'cpu';
       $('ng-level-field').hidden = ng.mode !== 'cpu';
+      $('ng-names-field').hidden = ng.mode !== 'two';
     });
   });
   $('ng-color').querySelectorAll('.choice').forEach((b) => {
@@ -160,8 +161,14 @@ function initNewGameDialog() {
   $('ng-start').addEventListener('click', () => {
     dlg.close();
     const human = ng.color === 'random' ? (Math.random() < 0.5 ? E.BLUE : E.RED) : Number(ng.color);
-    game.startGame({ mode: ng.mode, level: ng.level, human });
+    const names = { blue: $('ng-name-blue').value.trim().slice(0, 18), red: $('ng-name-red').value.trim().slice(0, 18) };
+    game.startGame({ mode: ng.mode, level: ng.level, human, names });
     if (location.hash !== '#play') location.hash = '#play';
+  });
+  $('ng-swap').addEventListener('click', () => {
+    const a = $('ng-name-blue').value;
+    $('ng-name-blue').value = $('ng-name-red').value;
+    $('ng-name-red').value = a;
   });
 }
 
@@ -186,6 +193,12 @@ function openNewGame() {
   $('ng-level').querySelectorAll('.choice').forEach((x) => x.classList.toggle('active', x.dataset.level === ng.level));
   $('ng-color-field').hidden = ng.mode !== 'cpu';
   $('ng-level-field').hidden = ng.mode !== 'cpu';
+  $('ng-names-field').hidden = ng.mode !== 'two';
+  const stats = loadStats();
+  const known = Object.keys(stats.players || {});
+  $('ng-names-list').innerHTML = known.map((n) => `<option value="${n.replace(/"/g, '&quot;')}"></option>`).join('');
+  $('ng-name-blue').value = s.names && s.names.blue ? s.names.blue : (stats.lastNames ? stats.lastNames.blue : '') || '';
+  $('ng-name-red').value = s.names && s.names.red ? s.names.red : (stats.lastNames ? stats.lastNames.red : '') || '';
   $('dlg-new').showModal();
 }
 

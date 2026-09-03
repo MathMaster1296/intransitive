@@ -196,6 +196,10 @@
         <div class="muted small" id="st-puzzle" style="margin-top:0.4rem"></div>
         <div class="badges" id="badges"></div>
       </div>
+      <div class="card" id="leaderboard-card" hidden>
+        <h2>Local leaderboard</h2>
+        <ol class="leaderboard" id="leaderboard"></ol>
+      </div>
       <div class="card">
         <h2>Tip <button class="btn small ghost" id="tip-next" type="button">another</button></h2>
         <p class="tip" id="tip-text"></p>
@@ -612,6 +616,16 @@
       <button type="button" class="choice" data-color="1"><strong><span class="dot red"></span> Red</strong><span>Moves second</span></button>
       <button type="button" class="choice" data-color="random"><strong>Random</strong><span>Flip a coin</span></button>
     </div>
+  </div>
+  <div class="field" id="ng-names-field" hidden>
+    <span>Players</span>
+    <div class="row" style="gap:0.4rem">
+      <label class="name-input"><span class="dot blue"></span><input id="ng-name-blue" list="ng-names-list" maxlength="18" placeholder="Blue's name" autocomplete="off"></label>
+      <button class="btn small ghost" id="ng-swap" type="button" title="Swap colours">&#8646;</button>
+      <label class="name-input"><span class="dot red"></span><input id="ng-name-red" list="ng-names-list" maxlength="18" placeholder="Red's name" autocomplete="off"></label>
+      <datalist id="ng-names-list"></datalist>
+    </div>
+    <p class="small muted" style="margin:0.3rem 0 0">Names are remembered on this device and each one gets its own rating. Leave them blank for a casual game.</p>
   </div>
   <div class="field" id="ng-level-field">
     <span>Level</span>

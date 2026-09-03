@@ -28,7 +28,56 @@ function blank() {
     streak: 0, bestStreak: 0, rating: 1000, ratedGames: 0, peak: 1000,
     puzzleRating: 1200, puzzleRated: 0, puzzlePeak: 1200, puzzleAttempts: {}, puzzleHistory: [],
     badges: {}, puzzles: {}, tutorialDone: false, history: [],
+    players: {}, lastNames: { blue: '', red: '' },
   };
+}
+
+// Player profiles for games between people on the same device.
+export function getPlayer(stats, name) {
+  const key = String(name || '').trim();
+  if (!key) return null;
+  if (!stats.players) stats.players = {};
+  if (!stats.players[key]) {
+    stats.players[key] = { name: key, rating: 1200, games: 0, wins: 0, losses: 0, draws: 0, peak: 1200, history: [] };
+  }
+  return stats.players[key];
+}
+
+// Rate a finished game between two named players. `winner` is 0 for blue,
+// 1 for red, or null for a draw. Returns the rating changes.
+export function recordTwoPlayerGame(stats, blueName, redName, winner, rated = true) {
+  const blue = getPlayer(stats, blueName);
+  const red = getPlayer(stats, redName);
+  if (!blue || !red || blue === red) return null;
+  const scoreBlue = winner === null ? 0.5 : winner === 0 ? 1 : 0;
+  const kFor = (pl) => (pl.games < PROVISIONAL_GAMES ? 40 : 24);
+  let dBlue = 0;
+  let dRed = 0;
+  if (rated) {
+    dBlue = Math.round(kFor(blue) * (scoreBlue - expected(blue.rating, red.rating)));
+    dRed = Math.round(kFor(red) * ((1 - scoreBlue) - expected(red.rating, blue.rating)));
+    blue.rating = Math.max(100, blue.rating + dBlue);
+    red.rating = Math.max(100, red.rating + dRed);
+    blue.peak = Math.max(blue.peak || 0, blue.rating);
+    red.peak = Math.max(red.peak || 0, red.rating);
+  }
+  for (const [pl, sc] of [[blue, scoreBlue], [red, 1 - scoreBlue]]) {
+    pl.games += 1;
+    if (sc === 1) pl.wins += 1;
+    else if (sc === 0) pl.losses += 1;
+    else pl.draws += 1;
+    pl.history.push({ t: Date.now(), vs: pl === blue ? red.name : blue.name, score: sc, rating: pl.rating });
+    if (pl.history.length > 50) pl.history = pl.history.slice(-50);
+  }
+  stats.lastNames = { blue: blue.name, red: red.name };
+  saveStats(stats);
+  return { blue: dBlue, red: dRed, blueRating: blue.rating, redRating: red.rating };
+}
+
+export function leaderboard(stats, limit = 8) {
+  return Object.values(stats.players || {})
+    .sort((a, b) => b.rating - a.rating || b.games - a.games)
+    .slice(0, limit);
 }
 
 export function loadStats() {

@@ -6,7 +6,7 @@ import { createBoard, pieceSvg } from './board.js';
 import { engine, scoreToShare, describeScore } from './analysis.js';
 import { sound } from './sound.js';
 import { confetti } from './fx.js';
-import { loadStats, saveStats, recordGame, BADGES, LEVEL_RATING, PROVISIONAL_GAMES, expected } from './stats.js';
+import { loadStats, saveStats, recordGame, BADGES, LEVEL_RATING, PROVISIONAL_GAMES, expected, getPlayer, recordTwoPlayerGame, leaderboard } from './stats.js';
 import { TIPS } from './lessons.js';
 
 const GAME_KEY = 'intransitive.game.v2';
@@ -35,6 +35,10 @@ function cap(s) {
   return s[0].toUpperCase() + s.slice(1);
 }
 
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
 export function createGame(ui) {
   const S = {
     game: E.newGame(),
@@ -42,6 +46,7 @@ export function createGame(ui) {
     level: 'medium',
     human: E.BLUE,
     custom: false,
+    names: { blue: '', red: '' },
     selected: -1,
     thinking: false,
     seq: 0,
@@ -91,6 +96,7 @@ export function createGame(ui) {
       level: S.level,
       human: S.human,
       custom: S.custom,
+      names: S.names,
       start: S.custom ? { board: Array.from(g.start.board), turn: g.start.turn } : null,
       moves: g.moves.map((mv) => mv.m),
       resigned: g.result && g.result.reason === 'resign' ? g.result : null,
@@ -117,6 +123,7 @@ export function createGame(ui) {
       S.level = LEVEL_NAMES[data.level] ? data.level : 'medium';
       S.human = data.human === E.RED ? E.RED : E.BLUE;
       S.custom = !!data.custom;
+      S.names = data.names && typeof data.names === 'object' ? { blue: String(data.names.blue || ''), red: String(data.names.red || '') } : { blue: '', red: '' };
       S.quality = data.quality || {};
       S.assisted = !!data.assisted;
       S.recorded = !!data.recorded;
@@ -156,9 +163,19 @@ export function createGame(ui) {
     return { from: E.moveFrom(m), to: E.moveTo(m) };
   }
 
+  function playerName(player) {
+    const n = player === E.BLUE ? S.names.blue : S.names.red;
+    return n && n.trim() ? n.trim() : '';
+  }
+
   function humanName(player) {
-    if (S.mode === 'two') return cap(E.PLAYER_NAMES[player]);
+    if (S.mode === 'two') return playerName(player) || cap(E.PLAYER_NAMES[player]);
     return player === S.human ? 'You' : `Computer`;
+  }
+
+  function twoRated() {
+    return S.mode === 'two' && !S.custom && !S.assisted && !!playerName(E.BLUE) && !!playerName(E.RED)
+      && playerName(E.BLUE).toLowerCase() !== playerName(E.RED).toLowerCase();
   }
 
   // Rendering -----------------------------------------------------------
@@ -215,7 +232,7 @@ export function createGame(ui) {
       }
       sub.textContent = S.mode === 'cpu'
         ? `${LEVEL_NAMES[S.level]} computer${S.custom ? ', from a puzzle position' : ''}${S.assisted ? ', unrated' : ''}`
-        : 'Two players at one screen';
+        : (twoRated() ? 'Rated game between two players' : 'Two players at one screen');
     }
     const left = Math.ceil((E.STAGNATION_PLIES - g.sinceCapture) / 2);
     const warn = !g.result && left <= 30;
@@ -224,9 +241,17 @@ export function createGame(ui) {
 
     const cpuLabel = ` · ${LEVEL_NAMES[S.level]} (${LEVEL_RATING[S.level]})`;
     const youLabel = S.mode === 'cpu' ? ` (${stats.rating})` : '';
-    $('mu-blue').textContent = humanName(E.BLUE) + (S.mode === 'cpu' ? (S.human !== E.BLUE ? cpuLabel : youLabel) : '');
-    $('mu-red').textContent = humanName(E.RED) + (S.mode === 'cpu' ? (S.human !== E.RED ? cpuLabel : youLabel) : '');
-    $('mu-rated').textContent = S.mode === 'cpu' ? (S.custom ? 'Unrated' : S.assisted ? 'Unrated (undo or hint used)' : 'Rated') : '';
+    const twoLabel = (player) => {
+      const name = playerName(player);
+      if (!name) return '';
+      const pl = getPlayer(stats, name);
+      return pl ? ` (${pl.rating})` : '';
+    };
+    $('mu-blue').textContent = humanName(E.BLUE) + (S.mode === 'cpu' ? (S.human !== E.BLUE ? cpuLabel : youLabel) : twoLabel(E.BLUE));
+    $('mu-red').textContent = humanName(E.RED) + (S.mode === 'cpu' ? (S.human !== E.RED ? cpuLabel : youLabel) : twoLabel(E.RED));
+    $('mu-rated').textContent = S.mode === 'cpu'
+      ? (S.custom ? 'Unrated' : S.assisted ? 'Unrated (undo or hint used)' : 'Rated')
+      : (twoRated() ? 'Rated' : S.assisted ? 'Unrated (undo used)' : playerName(E.BLUE) && playerName(E.RED) ? 'Unrated' : 'Unrated (add names for a rated game)');
 
     $('btn-undo').disabled = g.moves.length === 0 || !isLive();
     $('btn-resign').disabled = !!g.result || !isLive();
@@ -343,6 +368,12 @@ export function createGame(ui) {
     $('st-puzzle').textContent = `Puzzle rating ${stats.puzzleRating}${stats.puzzleRated < 20 ? '?' : ''}${stats.rushBest ? ` · rush best ${stats.rushBest}` : ''}`;
     const series = [1000].concat((stats.history || []).filter((h) => h.rating !== undefined).map((h) => h.rating)).slice(-30);
     sparkline(series);
+    const lb = leaderboard(stats);
+    const card = $('leaderboard-card');
+    if (card) {
+      card.hidden = lb.length === 0;
+      $('leaderboard').innerHTML = lb.map((pl, i) => `<li><span class="lb-rank">${i + 1}</span><span class="lb-name">${escapeHtml(pl.name)}</span><span class="lb-rec muted">${pl.wins}-${pl.losses}${pl.draws ? '-' + pl.draws : ''}</span><strong>${pl.rating}${pl.games < PROVISIONAL_GAMES ? '?' : ''}</strong></li>`).join('');
+    }
     const html = BADGES.map((b) => {
       const earned = !!stats.badges[b.id];
       return `<span class="badge ${earned ? 'earned' : ''}" title="${b.desc}"><svg><use href="#i-star"/></svg>${b.name}</span>`;
@@ -516,9 +547,10 @@ export function createGame(ui) {
 
   // Game lifecycle ------------------------------------------------------
 
-  function startGame({ mode = S.mode, level = S.level, human = S.human, board: b = null, turn = E.BLUE, custom = false } = {}) {
+  function startGame({ mode = S.mode, level = S.level, human = S.human, board: b = null, turn = E.BLUE, custom = false, names = null } = {}) {
     cancelThinking();
     S.mode = mode;
+    S.names = names ? { blue: String(names.blue || ''), red: String(names.red || '') } : (mode === 'two' ? S.names : { blue: '', red: '' });
     S.level = level;
     S.human = human;
     S.custom = custom;
@@ -564,6 +596,15 @@ export function createGame(ui) {
           setTimeout(() => ui.toast(`Rating ${delta >= 0 ? '+' : ''}${delta}: ${stats.rating}`), 600);
         }
         earned.forEach((b, i) => setTimeout(() => ui.badge(b), 900 + i * 1400));
+      }
+    }
+    if (S.mode === 'two' && !S.recorded && playerName(E.BLUE) && playerName(E.RED)) {
+      S.recorded = true;
+      const rated = twoRated();
+      const res = recordTwoPlayerGame(stats, playerName(E.BLUE), playerName(E.RED), r.winner, rated);
+      if (res && rated) {
+        const fmt = (d) => `${d >= 0 ? '+' : ''}${d}`;
+        sub += ` ${playerName(E.BLUE)} ${fmt(res.blue)} (${res.blueRating}), ${playerName(E.RED)} ${fmt(res.red)} (${res.redRating}).`;
       }
     }
     if (r.winner === null) sound.play('draw');
@@ -780,6 +821,8 @@ export function createGame(ui) {
       stats = loadStats();
       Object.assign(stats, { games: 0, wins: 0, losses: 0, draws: 0, streak: 0, bestStreak: 0, rating: 1000, ratedGames: 0, badges: {}, history: [] });
       stats.byLevel = { easy: { w: 0, l: 0, d: 0 }, medium: { w: 0, l: 0, d: 0 }, hard: { w: 0, l: 0, d: 0 } };
+      stats.players = {};
+      stats.peak = 1000;
       saveStats(stats);
       renderStats();
       ui.toast('Stats reset.');
