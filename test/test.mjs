@@ -297,3 +297,41 @@ test('stats record games, rating and badges', () => {
   assert.equal(p2[0].id, 'puzzles');
   assert.ok(BADGES.length >= 8);
 });
+
+import { STRATEGY_LINES, TRYITS, QUIZZES, ENDGAMES, LAB_PRESETS, DIAGRAMS, boardFrom as lessonBoard } from '../js/lessons.js';
+
+test('every strategy line is a legal sequence with one caption per ply', () => {
+  for (const [key, line] of Object.entries(STRATEGY_LINES)) {
+    const g = parseMoves(line.moves, { board: lessonBoard(line.spec), turn: line.turn });
+    assert.equal(g.moves.length, line.captions.length, `${key}: captions`);
+    assert.ok(line.intro.length > 20, `${key}: intro`);
+  }
+});
+
+test('try-it positions have legal solutions', () => {
+  for (const [key, t] of Object.entries(TRYITS)) {
+    const board = lessonBoard(t.spec);
+    const legal = legalMoves(board, t.turn).map((m) => notation(board, m));
+    for (const s of t.solutions) assert.ok(legal.includes(s), `${key}: ${s}`);
+  }
+});
+
+test('quizzes point at a real answer', () => {
+  for (const [key, q] of Object.entries(QUIZZES)) {
+    assert.ok(q.answer >= 0 && q.answer < q.options.length, key);
+    assert.ok(q.explain.length > 20, key);
+    if (q.spec) assert.ok(lessonBoard(q.spec).some((v) => v), key);
+  }
+});
+
+test('endgame and lab positions are playable', () => {
+  for (const e of ENDGAMES.concat(LAB_PRESETS)) {
+    const board = lessonBoard(e.spec);
+    assert.equal(board[HOME[0]], 0, `${e.id || e.name}: blue corner empty`);
+    assert.equal(board[HOME[1]], 0, `${e.id || e.name}: red corner empty`);
+    assert.ok(legalMoves(board, e.turn).length > 0, `${e.id || e.name}: side to move can move`);
+    const c = counts(board);
+    assert.ok(c[0].every((n) => n <= 4) && c[1].every((n) => n <= 4), `${e.id || e.name}: piece counts`);
+  }
+  assert.ok(DIAGRAMS.opening.targets.length === 3);
+});

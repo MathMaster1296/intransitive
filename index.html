@@ -257,56 +257,236 @@
 </section>
 
 <section id="view-strategy" class="view" hidden>
-  <h1>Strategy notes</h1>
-  <p class="lead">The ideas on this page come from the game's own strategy guide, laid out here with diagrams you can check against the board. Think of it as the reference card.</p>
+  <h1>Strategy guide</h1>
+  <p class="lead">Everything you need to play well, in reading order, with a board to play with in every chapter. In a hurry? Read the cheat sheet and come back for the rest.</p>
+  <div class="guide">
+    <nav class="toc card" aria-label="Chapters">
+      <span class="toc-title">Chapters</span>
+      <a href="#strategy/cheat">1. Cheat sheet</a>
+      <a href="#strategy/advantages">2. Three advantages</a>
+      <a href="#strategy/rings">3. Rings</a>
+      <a href="#strategy/defence">4. Stopping a runner</a>
+      <a href="#strategy/lab">5. Position lab</a>
+      <a href="#strategy/trades">6. Trades</a>
+      <a href="#strategy/tactics">7. Tactics</a>
+      <a href="#strategy/openings">8. Openings</a>
+      <a href="#strategy/endgames">9. Endgames</a>
+      <a href="#strategy/checklist">10. Before every move</a>
+      <a href="#strategy/glossary">11. Glossary</a>
+    </nav>
+    <div class="guide-body">
 
-  <div class="prose">
-    <h2>Three kinds of advantage</h2>
-    <p>Material is the simple one: you have more pieces than the other side. It is exactly as good as it sounds.</p>
-    <p>Position comes in two sizes. Macro position means your pieces are closer to the enemy corner than theirs are to yours. A cramped opponent has fewer useful moves, and more importantly the endgame is a race, so trading down into an endgame favours whoever is already further forward. Micro position is about where pieces stand relative to each other: an isolated enemy scissors with your rock nearby is a target, and a fork is a piece attacking two things at once.</p>
-    <p>Matchup is the one that is unique to this game. Each of your piece types is only worth something if the enemy has pieces it can capture, and each enemy type is only dangerous if you have pieces it can capture. A side with a single scissors against several enemy papers is in trouble, because one scissors can only answer one paper at a time. Two papers attacking two different places will break through. In general a balanced distribution is the safest, but the right distribution depends on what the other side has left, and it is worth counting the pieces on both sides every few moves.</p>
-    <p>Whoever holds two of the three advantages usually wins.</p>
-  </div>
-  <div class="figure-row">
-    <figure><div data-diagram="matchup"></div><figcaption></figcaption></figure>
-  </div>
+      <section class="chapter" id="s-cheat">
+        <span class="kicker">Chapter 1</span>
+        <h2>The cheat sheet</h2>
+        <p class="prose">Six habits that decide most games. Each one gets a chapter of its own below, with positions you can play through.</p>
+        <div class="cheat">
+          <div class="card"><strong>Count pieces by type</strong><p>Not just how many, but how many of each. One scissors against three papers is losing.</p></div>
+          <div class="card"><strong>Count rings</strong><p>Every runner is a countdown. Your blocker has to stay a ring ahead of it.</p></div>
+          <div class="card"><strong>Block with the right type</strong><p>A corner blocker must be a piece the runner cannot capture: the same type, or the type that beats it.</p></div>
+          <div class="card"><strong>Capture when you can</strong><p>Taking the runner ends the threat. Blocking only postpones it.</p></div>
+          <div class="card"><strong>Scissors first, papers behind</strong><p>A paper walking forward on its own is food for enemy scissors.</p></div>
+          <div class="card"><strong>Two moves is a lot</strong><p>A trapped piece can wait. A race for the corner cannot.</p></div>
+        </div>
+        <a class="next-link" href="#strategy/advantages">Next chapter: the three advantages</a>
+      </section>
 
-  <div class="prose">
-    <h2>Rings</h2>
-    <p>Draw the squares that are one move from a corner, then two, then three. Each of those L-shaped bands is a ring, and every square on a ring is the same number of moves from the corner. Because pieces move like kings, the ring number is the only distance that matters. The Rings button on the play page paints them on the board for either corner.</p>
-  </div>
-  <div class="figure-row">
-    <figure><div data-diagram="rings"></div><figcaption></figcaption></figure>
-  </div>
+      <section class="chapter" id="s-advantages">
+        <span class="kicker">Chapter 2</span>
+        <h2>The three advantages</h2>
+        <div class="prose">
+          <p>Every position can be read through three questions. Who has more pieces? Who is closer to the enemy corner? And who has the better mix of types? A player who holds two of the three usually wins.</p>
+          <p><strong>Material</strong> is the simple one: you have more pieces than the other side. It is exactly as good as it sounds, with one twist covered under matchup.</p>
+          <p><strong>Position</strong> comes in two sizes. Macro position means your pieces are closer to the enemy corner than theirs are to yours. A cramped opponent has fewer useful moves, and more importantly the endgame is a race, so trading down into an endgame favours whoever is already further forward. Micro position is about where pieces stand relative to each other: an isolated enemy scissors with your rock nearby is a target, and a piece attacking two things at once is a fork.</p>
+          <p><strong>Matchup</strong> is the one that makes this game different. Each of your piece types is only worth something if the enemy has pieces it can capture, and each enemy type is only dangerous if you have pieces it can capture. A side with a single scissors against several enemy papers is in trouble, because one scissors can only answer one paper at a time. Two papers attacking two different places will break through.</p>
+        </div>
+        <table class="matchup-table">
+          <thead><tr><th>If you have</th><th>Then</th><th>So</th></tr></thead>
+          <tbody>
+            <tr><td>No scissors</td><td>Every enemy paper is immortal</td><td>Never trade away your last scissors while they still have papers</td></tr>
+            <tr><td>No rocks</td><td>Every enemy scissors is immortal</td><td>Keep a rock at home to guard the corner</td></tr>
+            <tr><td>No papers</td><td>Every enemy rock is immortal</td><td>Do not let their rocks near your corner</td></tr>
+            <tr><td>One of a type</td><td>Two enemy pieces of the type it beats can attack two places at once</td><td>Keep the lone piece central, and expect an overload</td></tr>
+          </tbody>
+        </table>
+        <div class="figure-row">
+          <figure><div data-diagram="matchup"></div><figcaption></figcaption></figure>
+        </div>
+        <div data-quiz="material"></div>
+        <a class="next-link" href="#strategy/rings">Next chapter: rings</a>
+      </section>
 
-  <div class="prose">
-    <h2>Passive and active defence</h2>
-    <p>Sooner or later an enemy piece slips past your pieces and starts running for your corner. You have two ways to stop it.</p>
-    <p>A passive defence puts a piece in your own corner that the runner cannot capture, which means a piece of the same type or the type that beats it. The runner is still alive and still a threat, but it cannot finish. The rule is simple: you have to reach the corner first, so you have to stay ahead of the runner in rings. If the runner is on ring 5 and it is your move, your blocker needs to step onto ring 4 now, then ring 3 when the runner reaches ring 4, and so on. Do that and you will always arrive first, unless one of your own pieces is standing in the way.</p>
-    <p>An active defence uses the piece type that beats the runner and captures it. The same ring rule mostly applies, with one bit of extra slack: a defender that is one ring behind the runner can still catch it if both are on the same side of the ring, because it can shadow the runner along the edge. From the other side of the ring it never catches up.</p>
-  </div>
-  <div class="figure-row">
-    <figure><div data-diagram="passive"></div><figcaption></figcaption></figure>
-    <figure><div data-diagram="active"></div><figcaption></figcaption></figure>
-    <figure><div data-diagram="sides"></div><figcaption></figcaption></figure>
-  </div>
+      <section class="chapter" id="s-rings">
+        <span class="kicker">Chapter 3</span>
+        <h2>Rings: the only distance that matters</h2>
+        <div class="prose">
+          <p>Pieces move like kings, so the number of moves between a piece and a corner is the larger of its distance along the files and its distance along the ranks. Draw every square that is one move from a corner, then two, then three, and you get a set of L-shaped bands. Those are the rings.</p>
+          <p>Rings turn a race into arithmetic. A runner on ring 4 needs four moves. A blocker on ring 3 needs three. Who moves first settles the rest. You will count rings before almost every move in the middle and end of a game, and the Rings button on the play page paints them on the board so you do not have to count on your fingers.</p>
+        </div>
+        <div id="ring-finder"></div>
+        <a class="next-link" href="#strategy/defence">Next chapter: stopping a runner</a>
+      </section>
 
-  <div class="prose">
-    <h2>Trades</h2>
-    <p>Each side starts with four papers but only three rocks and three scissors, so losing a paper costs less than losing a rock or a scissors. A trade that leaves you with three of each and your opponent with a hole in their distribution is a good trade even at equal material. A trade that leaves you with one scissors is usually a bad one, unless you get real position out of it. When an opponent offers a trade, ask what the counts look like afterwards before you accept.</p>
-    <p>The extreme case is a sacrifice for matchup: if you have no scissors at all, every enemy paper is immortal, and a lone immortal paper can beat three pieces in the endgame.</p>
+      <section class="chapter" id="s-defence">
+        <span class="kicker">Chapter 4</span>
+        <h2>Stopping a runner</h2>
+        <div class="prose">
+          <p>Sooner or later an enemy piece slips past your pieces and heads for your corner. You have two ways to stop it. A passive defence puts a piece the runner cannot capture into the corner, so the runner arrives and finds the door locked. An active defence captures the runner with the type that beats it. Both depend on rings.</p>
+        </div>
+        <div class="rule"><span class="rule-icon">R</span><p><strong>The ring rule.</strong> If it is your move, your blocker must be on the runner's ring or closer to the corner. If it is the runner's move, your blocker must already be a ring closer. Then step inward every time the runner does, and you arrive first.</p></div>
+        <div data-line="passive"></div>
+        <div data-line="active"></div>
+        <div data-quiz="ring"></div>
+        <div class="prose">
+          <h3>Which pieces can block?</h3>
+          <p>A blocker sitting in the corner only works if the runner cannot capture it. That means the same type as the runner, or the type that beats it. The third type just gets captured, corner and all, which is a loss.</p>
+        </div>
+        <table class="matchup-table">
+          <thead><tr><th>Runner</th><th>Safe blockers</th><th>Can capture it</th></tr></thead>
+          <tbody>
+            <tr><td>Rock</td><td>Rock, paper</td><td>Paper</td></tr>
+            <tr><td>Paper</td><td>Paper, scissors</td><td>Scissors</td></tr>
+            <tr><td>Scissors</td><td>Scissors, rock</td><td>Rock</td></tr>
+          </tbody>
+        </table>
+        <div data-quiz="block"></div>
+        <div class="prose">
+          <h3>The same-side exception</h3>
+          <p>Active defenders get a little slack. A piece that beats the runner can catch it from one ring behind, as long as both are on the same side of the ring, because it can cut across into the runner's path and shadow it along the edge. From the other side of the ring it never catches up, and two rings behind is always too far.</p>
+        </div>
+        <div data-line="sides"></div>
+        <div data-line="otherside"></div>
+        <div class="rule"><span class="rule-icon">S</span><p><strong>Same side, one ring behind:</strong> catchable. <strong>Other side or two rings behind:</strong> block the corner instead, or lose.</p></div>
+        <div data-tryit="side"></div>
+        <div data-tryit="race"></div>
+        <div class="prose">
+          <h3>More than one runner</h3>
+          <p>A blocker stops the two types it does not lose to. Two runners of different types therefore need a blocker that beats neither of them, and there is exactly one such type for each pair. If you do not have it, you need to capture one runner and block the other, and the ring rule applies to both jobs at once.</p>
+        </div>
+        <div data-line="overload"></div>
+        <a class="next-link" href="#strategy/lab">Next chapter: the position lab</a>
+      </section>
 
-    <h2>Traps and tempo</h2>
-    <p>A piece with no safe squares is as good as captured, and you do not have to collect it right away. Two moves is a lot in this game, since two moves is often enough to win outright, so leave a trapped piece where it is and spend the moves on an attack instead. The same logic runs the other way: when your pieces are scattered and several are isolated, retreat and regroup before your opponent starts collecting them.</p>
-  </div>
-  <div class="figure-row">
-    <figure><div data-diagram="trap"></div><figcaption></figcaption></figure>
-  </div>
+      <section class="chapter" id="s-lab">
+        <span class="kicker">Chapter 5</span>
+        <h2>Position lab</h2>
+        <div class="prose">
+          <p>Set up any race and let the engine settle it. Place a runner and a defender, say who moves, and ask. The engine searches the position to the end and reports a forced win or a hold, with the best first move drawn on the board. Try the presets first, then move the pieces one square at a time and watch the verdict flip.</p>
+        </div>
+        <div id="position-lab"></div>
+        <a class="next-link" href="#strategy/trades">Next chapter: trades</a>
+      </section>
 
-  <div class="prose">
-    <h2>Endgames</h2>
-    <p>Once the board thins out, macro position and matchup decide almost everything, and the variety is enormous. One rock, one paper and one scissors against two rocks and one paper plays nothing like two papers against a rock and a scissors. A common pattern for the stronger side is to park one piece in the home corner as a permanent block and walk the others forward. Experienced players say that after dozens of games they have still never seen the same endgame twice.</p>
-    <p>If you want to test any of this, the <a href="#puzzles">puzzles</a> page has positions built around these ideas, and the computer on the play page uses the same three advantages in its evaluation. Turn on Threats and Rings while you play to see the ideas on the board.</p>
+      <section class="chapter" id="s-trades">
+        <span class="kicker">Chapter 6</span>
+        <h2>Trades</h2>
+        <div class="prose">
+          <p>Each side starts with four papers but only three rocks and three scissors, so losing a paper costs less than losing a rock or a scissors. A trade that leaves you with three of each and your opponent with a hole in their distribution is a good trade even at equal material. A trade that leaves you with one scissors is usually a bad one, unless you get real position out of it.</p>
+          <p>The test is always the same. Before you accept or offer a trade, picture the piece counts afterwards for both sides. If the picture is balanced for you and lopsided for them, take it. If it is the other way round, decline, even when the capture looks free.</p>
+          <p>The extreme case is a sacrifice for matchup. If the enemy loses their last scissors, every one of your papers becomes immortal, and a lone immortal paper can beat three pieces in the endgame. Sometimes giving up a piece to remove that last scissors is the best move on the board.</p>
+        </div>
+        <div data-quiz="trade"></div>
+        <a class="next-link" href="#strategy/tactics">Next chapter: tactics</a>
+      </section>
+
+      <section class="chapter" id="s-tactics">
+        <span class="kicker">Chapter 7</span>
+        <h2>Tactics</h2>
+        <div class="prose">
+          <p>Three patterns come up in almost every game. Learn to see them a move before they happen.</p>
+          <h3>Forks</h3>
+          <p>A piece attacking two enemy pieces it beats will usually win one of them, because the enemy can only move one piece per turn. Papers fork rocks, scissors fork papers, rocks fork scissors. Loose pieces standing two squares apart are asking for it.</p>
+        </div>
+        <div data-line="fork"></div>
+        <div class="prose">
+          <h3>Traps</h3>
+          <p>A piece with no safe square is as good as captured. Edges and corners make traps easy, because a piece on the edge has only five neighbours and a piece in the corner has three. Do not rush to collect a trapped piece: it is not going anywhere, and the move is often better spent elsewhere.</p>
+        </div>
+        <div data-line="trap"></div>
+        <div class="prose">
+          <h3>Tempo</h3>
+          <p>Two moves is a lot. Two moves is often enough to win outright, so when you have the choice between collecting a trapped piece and starting a race, count the race first.</p>
+        </div>
+        <div data-line="tempo"></div>
+        <div data-tryit="tempo"></div>
+        <div data-quiz="tempo"></div>
+        <div class="prose">
+          <h3>No stalemate</h3>
+          <p>A player with no legal move loses on the spot. It is rare with many pieces on the board, but at the very end a lone piece can be boxed in by pieces it cannot capture, and that wins the game immediately.</p>
+        </div>
+        <div data-tryit="boxed"></div>
+        <a class="next-link" href="#strategy/openings">Next chapter: openings</a>
+      </section>
+
+      <section class="chapter" id="s-openings">
+        <span class="kicker">Chapter 8</span>
+        <h2>Openings</h2>
+        <div class="prose">
+          <p>The opening is the least dramatic part of the game, but a few habits pay off. Both sides start with the scissors in front, the papers behind them and the rocks nearest the corner, and that order is worth keeping. Scissors are the pieces that can meet the enemy's front line safely, because the enemy's scissors cannot capture them. A paper that walks forward on its own runs into those scissors and dies.</p>
+          <p>The engine's favourite first moves are all scissors moves, and its least favourite are all paper advances. That is not a coincidence.</p>
+        </div>
+        <div class="opening-list">
+          <div class="card"><strong>e3-f3</strong><span>Engine's top pick. The right-hand scissors steps toward the centre.</span></div>
+          <div class="card"><strong>e3-f4</strong><span>The same scissors, one square further forward.</span></div>
+          <div class="card"><strong>d4-e5</strong><span>The middle scissors takes the long diagonal.</span></div>
+          <div class="card"><strong>Avoid d3-e4, c4-d5, b5-c6</strong><span>Papers stepping in front of the scissors line. The engine rates these worst.</span></div>
+        </div>
+        <div class="figure-row">
+          <figure><div data-diagram="opening"></div><figcaption></figcaption></figure>
+        </div>
+        <div class="prose">
+          <p>After that, develop toward the centre, keep pieces of different types near each other so every enemy attacker has something to fear, and do not trade until the counts afterwards favour you. The first player to leave a piece alone in the middle usually loses it.</p>
+        </div>
+        <a class="next-link" href="#strategy/endgames">Next chapter: endgames</a>
+      </section>
+
+      <section class="chapter" id="s-endgames">
+        <span class="kicker">Chapter 9</span>
+        <h2>Endgames</h2>
+        <div class="prose">
+          <p>Once the board thins out, macro position and matchup decide almost everything, and the variety is enormous. One rock, one paper and one scissors against two rocks and a paper plays nothing like two papers against a rock and a scissors. Experienced players say that after dozens of games they have still never seen the same endgame twice.</p>
+          <p>Some patterns do repeat. The stronger side usually parks one piece in its own corner as a permanent block and walks the others forward together. An immortal piece, one the enemy has no answer to, wins on its own if it is escorted. And the ring rule decides every race, so the side that counts first is the side that wins.</p>
+          <p>The best way to learn endgames is to play them. Each position below starts you against the computer with the side to move.</p>
+        </div>
+        <div id="endgame-practice"></div>
+        <a class="next-link" href="#strategy/checklist">Next chapter: before every move</a>
+      </section>
+
+      <section class="chapter" id="s-checklist">
+        <span class="kicker">Chapter 10</span>
+        <h2>Before every move</h2>
+        <p class="prose">Run this list every turn until it becomes automatic. It takes ten seconds and catches most blunders.</p>
+        <ol class="checklist">
+          <li><strong>What is attacked?</strong> Look at every one of your pieces next to an enemy piece that beats it. Turn on Threats on the play page if you want the board to show you.</li>
+          <li><strong>Can I capture safely?</strong> A free piece is a free piece. Check that nothing recaptures, and check the counts afterwards.</li>
+          <li><strong>Is anything running?</strong> Find the enemy piece closest to your corner and count its ring. Find your best blocker and count its ring. Apply the ring rule.</li>
+          <li><strong>Am I running?</strong> Do the same for your closest piece and their best blocker. If you win the race, everything else can wait.</li>
+          <li><strong>What do the counts look like after this move?</strong> Any trade or sacrifice is judged by the distribution it leaves behind.</li>
+          <li><strong>Can I make two threats at once?</strong> A fork, a runner plus an attack, or two runners of different types. One threat gets answered; two often do not.</li>
+        </ol>
+        <a class="next-link" href="#strategy/glossary">Next: glossary</a>
+      </section>
+
+      <section class="chapter" id="s-glossary">
+        <span class="kicker">Chapter 11</span>
+        <h2>Glossary</h2>
+        <dl class="glossary">
+          <div><dt>Ring</dt><dd>All the squares that are the same number of moves from a corner. Ring 1 is the three squares next to it.</dd></div>
+          <div><dt>Runner</dt><dd>Any piece heading for the enemy corner with a real chance of getting there.</dd></div>
+          <div><dt>Passive defence</dt><dd>Parking a piece the runner cannot capture in your own corner.</dd></div>
+          <div><dt>Active defence</dt><dd>Capturing the runner with the type that beats it.</dd></div>
+          <div><dt>Blocker</dt><dd>The piece doing a passive defence. It must be the runner's own type or the type that beats it.</dd></div>
+          <div><dt>Matchup</dt><dd>How the two sides' mixes of rocks, papers and scissors compare. Lopsided is bad.</dd></div>
+          <div><dt>Immortal piece</dt><dd>A piece the enemy can no longer capture because they have none of the type that beats it.</dd></div>
+          <div><dt>Overload</dt><dd>Giving one defender two jobs at once, for example two papers against one scissors.</dd></div>
+          <div><dt>Fork</dt><dd>One piece attacking two enemy pieces it beats.</dd></div>
+          <div><dt>Trap</dt><dd>A piece with no safe square to move to. As good as captured.</dd></div>
+          <div><dt>Tempo</dt><dd>A move. Wasting one is often the difference between winning and losing a race.</dd></div>
+          <div><dt>Stagnation</dt><dd>The draw that ends a game after 100 moves with no capture.</dd></div>
+        </dl>
+      </section>
+
+    </div>
   </div>
 </section>
 

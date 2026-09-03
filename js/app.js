@@ -7,6 +7,7 @@ import { createGame } from './game.js';
 import { createPuzzles } from './puzzles.js';
 import { createTutorial } from './tutorial.js';
 import { createDemo } from './home.js';
+import { createStrategy } from './strategy.js';
 import { sound } from './sound.js';
 import { loadStats, saveStats } from './stats.js';
 
@@ -101,12 +102,25 @@ function route() {
     return;
   }
   let view = hash;
+  let section = '';
+  if (view.startsWith('strategy/')) {
+    section = view.slice('strategy/'.length);
+    view = 'strategy';
+  }
   if (!VIEWS.includes(view)) view = 'home';
   for (const v of VIEWS) $('view-' + v).hidden = v !== view;
   document.querySelectorAll('.tabs a, .bottom-nav a').forEach((a) => {
     a.classList.toggle('active', a.getAttribute('href') === '#' + view);
   });
   if (view === 'puzzles') puzzles.ensure();
+  if (view === 'strategy') {
+    strategy.ensure();
+    if (section) {
+      strategy.scrollTo(section);
+      currentView = view;
+      return;
+    }
+  }
   if (view === 'play') game.onVisible();
   if (view === 'home') demo.start();
   else demo.stop();
@@ -253,10 +267,10 @@ const ui = {
   badge,
   openNewGame,
   openMoves,
-  playPosition(board, turn, human) {
-    game.startGame({ mode: 'cpu', level: 'medium', human, board, turn, custom: true });
+  playPosition(board, turn, human, level = 'medium') {
+    game.startGame({ mode: 'cpu', level, human, board, turn, custom: true });
     location.hash = '#play';
-    toast('Playing the puzzle position against the medium computer.');
+    toast(`Playing this position against the ${level} computer.`);
   },
   tutorialDone() {
     refreshTutorialBanner();
@@ -268,6 +282,7 @@ const ui = {
 const game = createGame(ui);
 const puzzles = createPuzzles(ui);
 const tutorial = createTutorial(ui);
+const strategy = createStrategy(ui);
 
 initTheme();
 initSound();
