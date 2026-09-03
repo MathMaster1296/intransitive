@@ -6,7 +6,7 @@ import { createBoard, pieceSvg } from './board.js';
 import { engine, scoreToShare, describeScore } from './analysis.js';
 import { sound } from './sound.js';
 import { confetti } from './fx.js';
-import { loadStats, saveStats, recordGame, BADGES } from './stats.js';
+import { loadStats, saveStats, recordGame, BADGES, LEVEL_RATING, PROVISIONAL_GAMES, expected } from './stats.js';
 import { TIPS } from './lessons.js';
 
 const GAME_KEY = 'intransitive.game.v2';
@@ -222,8 +222,10 @@ export function createGame(ui) {
     $('status-stagnation').hidden = !warn;
     if (warn) $('status-stagnation').textContent = `Draw in ${left} move${left === 1 ? '' : 's'} unless something is captured.`;
 
-    $('mu-blue').textContent = humanName(E.BLUE) + (S.mode === 'cpu' && S.human !== E.BLUE ? ` · ${LEVEL_NAMES[S.level]}` : '');
-    $('mu-red').textContent = humanName(E.RED) + (S.mode === 'cpu' && S.human !== E.RED ? ` · ${LEVEL_NAMES[S.level]}` : '');
+    const cpuLabel = ` · ${LEVEL_NAMES[S.level]} (${LEVEL_RATING[S.level]})`;
+    const youLabel = S.mode === 'cpu' ? ` (${stats.rating})` : '';
+    $('mu-blue').textContent = humanName(E.BLUE) + (S.mode === 'cpu' ? (S.human !== E.BLUE ? cpuLabel : youLabel) : '');
+    $('mu-red').textContent = humanName(E.RED) + (S.mode === 'cpu' ? (S.human !== E.RED ? cpuLabel : youLabel) : '');
     $('mu-rated').textContent = S.mode === 'cpu' ? (S.custom ? 'Unrated' : S.assisted ? 'Unrated (undo or hint used)' : 'Rated') : '';
 
     $('btn-undo').disabled = g.moves.length === 0 || !isLive();
@@ -311,10 +313,36 @@ export function createGame(ui) {
     $('board-frame').classList.toggle('board-dim', show);
   }
 
+  function sparkline(values) {
+    const svg = $('rating-spark');
+    if (!svg) return;
+    if (values.length < 2) {
+      svg.innerHTML = '';
+      svg.hidden = true;
+      return;
+    }
+    svg.hidden = false;
+    const w = 200;
+    const h = 44;
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const span = Math.max(40, max - min);
+    const pts = values.map((v, i) => `${(i / (values.length - 1)) * w},${h - 4 - ((v - min) / span) * (h - 8)}`);
+    svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    svg.innerHTML = `<polyline points="${pts.join(' ')}"/>`
+      + `<circle cx="${pts.at(-1).split(',')[0]}" cy="${pts.at(-1).split(',')[1]}" r="3"/>`;
+  }
+
   function renderStats() {
-    $('st-rating').textContent = stats.rating;
+    const prov = stats.ratedGames < PROVISIONAL_GAMES;
+    $('st-rating').textContent = `${stats.rating}${prov ? '?' : ''}`;
+    $('st-rating').title = prov ? `Provisional until ${PROVISIONAL_GAMES} rated games (${stats.ratedGames} so far)` : `Peak ${stats.peak || stats.rating}`;
+    $('st-peak').textContent = stats.peak && stats.peak !== stats.rating ? `peak ${stats.peak}` : prov ? `${stats.ratedGames}/${PROVISIONAL_GAMES} rated` : '';
     $('st-record').textContent = `${stats.wins} - ${stats.losses}`;
     $('st-streak').textContent = stats.streak;
+    $('st-puzzle').textContent = `Puzzle rating ${stats.puzzleRating}${stats.puzzleRated < 20 ? '?' : ''}${stats.rushBest ? ` · rush best ${stats.rushBest}` : ''}`;
+    const series = [1000].concat((stats.history || []).filter((h) => h.rating !== undefined).map((h) => h.rating)).slice(-30);
+    sparkline(series);
     const html = BADGES.map((b) => {
       const earned = !!stats.badges[b.id];
       return `<span class="badge ${earned ? 'earned' : ''}" title="${b.desc}"><svg><use href="#i-star"/></svg>${b.name}</span>`;
@@ -531,7 +559,10 @@ export function createGame(ui) {
           maxDeficit: S.maxDeficit,
           opponentScissorsOut: c[1 - S.human][E.SCISSORS] === 0,
         });
-        if (!S.assisted) sub += ` Rating ${delta >= 0 ? '+' : ''}${delta}.`;
+        if (!S.assisted) {
+          sub += ` Rating ${delta >= 0 ? '+' : ''}${delta}, now ${stats.rating}.`;
+          setTimeout(() => ui.toast(`Rating ${delta >= 0 ? '+' : ''}${delta}: ${stats.rating}`), 600);
+        }
         earned.forEach((b, i) => setTimeout(() => ui.badge(b), 900 + i * 1400));
       }
     }

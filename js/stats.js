@@ -1,7 +1,9 @@
 // Local statistics, rating and badges. Everything lives in localStorage.
 
 const KEY = 'intransitive.stats.v1';
-const LEVEL_RATING = { easy: 900, medium: 1200, hard: 1500 };
+export const LEVEL_RATING = { easy: 900, medium: 1200, hard: 1500 };
+export const PROVISIONAL_GAMES = 10;
+export const PROVISIONAL_PUZZLES = 20;
 
 export const BADGES = [
   { id: 'first-win', name: 'First win', desc: 'Beat the computer once.' },
@@ -13,13 +15,18 @@ export const BADGES = [
   { id: 'puzzles', name: 'Puzzle master', desc: 'Solve every puzzle.' },
   { id: 'immortal', name: 'Immortal', desc: 'Win a game after the computer runs out of scissors.' },
   { id: 'ten-games', name: 'Regular', desc: 'Play ten games against the computer.' },
+  { id: 'rating-1200', name: 'Club player', desc: 'Reach a game rating of 1200.' },
+  { id: 'rating-1500', name: 'Expert', desc: 'Reach a game rating of 1500.' },
+  { id: 'puzzle-1500', name: 'Sharp eyes', desc: 'Reach a puzzle rating of 1500.' },
+  { id: 'rush-10', name: 'Rush hour', desc: 'Solve ten puzzles in one puzzle rush.' },
 ];
 
 function blank() {
   return {
     games: 0, wins: 0, losses: 0, draws: 0,
     byLevel: { easy: { w: 0, l: 0, d: 0 }, medium: { w: 0, l: 0, d: 0 }, hard: { w: 0, l: 0, d: 0 } },
-    streak: 0, bestStreak: 0, rating: 1000, ratedGames: 0,
+    streak: 0, bestStreak: 0, rating: 1000, ratedGames: 0, peak: 1000,
+    puzzleRating: 1200, puzzleRated: 0, puzzlePeak: 1200, puzzleAttempts: {}, puzzleHistory: [],
     badges: {}, puzzles: {}, tutorialDone: false, history: [],
   };
 }
@@ -42,8 +49,51 @@ export function saveStats(stats) {
   }
 }
 
-function expected(a, b) {
+export function expected(a, b) {
   return 1 / (1 + 10 ** ((b - a) / 400));
+}
+
+// Every puzzle carries a rating derived from its difficulty, how long the
+// win takes, and whether the key move is quiet.
+export function puzzleRating(p) {
+  let r = 700 + 300 * p.difficulty;
+  if (p.winIn) r += 40 * Math.min(p.winIn, 5);
+  if (p.solutions[0] && !p.solutions[0].includes('x')) r += 60;
+  if (p.source === 'game') r += 60;
+  return r;
+}
+
+// The first attempt at a puzzle is rated: solved cleanly counts as a win,
+// a wrong move or looking at the solution counts as a loss.
+export function recordPuzzleAttempt(stats, p, success) {
+  if (stats.puzzleAttempts[p.id]) return { delta: 0, first: false, rating: stats.puzzleRating };
+  const pr = puzzleRating(p);
+  const k = stats.puzzleRated < PROVISIONAL_PUZZLES ? 40 : 20;
+  const delta = Math.round(k * ((success ? 1 : 0) - expected(stats.puzzleRating, pr)));
+  stats.puzzleRating = Math.max(100, stats.puzzleRating + delta);
+  stats.puzzlePeak = Math.max(stats.puzzlePeak || 0, stats.puzzleRating);
+  stats.puzzleRated += 1;
+  stats.puzzleAttempts[p.id] = success ? 'win' : 'loss';
+  stats.puzzleHistory.push({ t: Date.now(), id: p.id, delta, rating: stats.puzzleRating });
+  if (stats.puzzleHistory.length > 100) stats.puzzleHistory = stats.puzzleHistory.slice(-100);
+  const earned = [];
+  if (stats.puzzleRating >= 1500 && !stats.badges['puzzle-1500']) {
+    stats.badges['puzzle-1500'] = Date.now();
+    earned.push(BADGES.find((b) => b.id === 'puzzle-1500'));
+  }
+  saveStats(stats);
+  return { delta, first: true, rating: stats.puzzleRating, earned };
+}
+
+export function recordRush(stats, score) {
+  const earned = [];
+  stats.rushBest = Math.max(stats.rushBest || 0, score);
+  if (score >= 10 && !stats.badges['rush-10']) {
+    stats.badges['rush-10'] = Date.now();
+    earned.push(BADGES.find((b) => b.id === 'rush-10'));
+  }
+  saveStats(stats);
+  return earned;
 }
 
 // Record a finished game against the computer. `outcome` is 'win', 'loss' or
@@ -75,6 +125,7 @@ export function recordGame(stats, {
     delta = Math.round(k * (score - expected(stats.rating, LEVEL_RATING[level] || 1200)));
     stats.rating = Math.max(100, stats.rating + delta);
     stats.ratedGames += 1;
+    stats.peak = Math.max(stats.peak || 0, stats.rating);
   }
 
   const earned = [];
@@ -94,8 +145,10 @@ export function recordGame(stats, {
     if (opponentScissorsOut) grant('immortal');
   }
   if (stats.games >= 10) grant('ten-games');
+  if (stats.rating >= 1200) grant('rating-1200');
+  if (stats.rating >= 1500) grant('rating-1500');
 
-  stats.history.push({ t: Date.now(), level, outcome, moves, delta });
+  stats.history.push({ t: Date.now(), level, outcome, moves, delta, rating: stats.rating });
   if (stats.history.length > 50) stats.history = stats.history.slice(-50);
   saveStats(stats);
   return { earned, delta };

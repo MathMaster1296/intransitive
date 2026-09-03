@@ -10,7 +10,7 @@ import { createTutorial } from './tutorial.js';
 import { createDemo } from './home.js';
 import { createStrategy } from './strategy.js';
 import { sound } from './sound.js';
-import { loadStats, saveStats } from './stats.js';
+import { loadStats, saveStats, LEVEL_RATING, expected } from './stats.js';
 
 const THEME_KEY = 'intransitive.theme';
 const VIEWS = ['home', 'play', 'rules', 'strategy', 'puzzles', 'about'];
@@ -165,7 +165,18 @@ function initNewGameDialog() {
   });
 }
 
+function renderLevelOdds() {
+  const stats = loadStats();
+  for (const level of ['easy', 'medium', 'hard']) {
+    const el = document.querySelector(`#ng-level [data-level="${level}"] span`);
+    if (!el) continue;
+    const pct = Math.round(expected(stats.rating, LEVEL_RATING[level]) * 100);
+    el.textContent = `${el.dataset.desc} · rated ${LEVEL_RATING[level]} · you win about ${pct}%`;
+  }
+}
+
 function openNewGame() {
+  renderLevelOdds();
   const s = game.state;
   ng.mode = s.mode;
   ng.level = s.level;

@@ -356,3 +356,28 @@ test('shipped puzzles are well formed and their solutions are legal', () => {
     for (const wrong of Object.keys(p.refute)) assert.ok(legal.includes(wrong) && !p.solutions.includes(wrong), `${p.id}: refute ${wrong}`);
   }
 });
+
+import { puzzleRating, recordPuzzleAttempt, recordRush, expected, LEVEL_RATING } from '../js/stats.js';
+
+test('puzzle ratings and first-attempt scoring', () => {
+  const easy = { id: 'p1', difficulty: 1, winIn: null, solutions: ['d4xe5'], source: 'sparse' };
+  const hard = { id: 'p2', difficulty: 3, winIn: 5, solutions: ['a5-a4'], source: 'game' };
+  assert.equal(puzzleRating(easy), 1000);
+  assert.equal(puzzleRating(hard), 700 + 900 + 200 + 60 + 60);
+  const stats = {
+    puzzleRating: 1200, puzzleRated: 0, puzzlePeak: 1200, puzzleAttempts: {}, puzzleHistory: [], badges: {}, rushBest: 0,
+  };
+  const r1 = recordPuzzleAttempt(stats, hard, true);
+  assert.ok(r1.first && r1.delta > 0);
+  assert.equal(stats.puzzleRating, 1200 + r1.delta);
+  const r2 = recordPuzzleAttempt(stats, hard, false);
+  assert.ok(!r2.first && r2.delta === 0, 'second attempts are not rated');
+  const r3 = recordPuzzleAttempt(stats, easy, false);
+  assert.ok(r3.delta < 0);
+  assert.equal(stats.puzzleRated, 2);
+  assert.ok(Math.abs(expected(1200, 1200) - 0.5) < 1e-9);
+  assert.ok(expected(1500, LEVEL_RATING.easy) > 0.9);
+  const earned = recordRush(stats, 12);
+  assert.equal(stats.rushBest, 12);
+  assert.equal(earned[0].id, 'rush-10');
+});

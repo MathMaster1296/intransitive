@@ -6,7 +6,7 @@ import { createBoard } from './board.js';
 import { PUZZLE_SET } from './puzzledata.js';
 import { sound } from './sound.js';
 import { confetti } from './fx.js';
-import { loadStats, saveStats, recordPuzzle } from './stats.js';
+import { loadStats, recordPuzzle, recordPuzzleAttempt, recordRush, puzzleRating, PROVISIONAL_PUZZLES } from './stats.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -51,7 +51,9 @@ export function createPuzzles(ui) {
   function visibleIndexes() {
     return PUZZLE_SET.map((p, i) => i).filter((i) => {
       const p = PUZZLE_SET[i];
-      return (filter.theme === 'all' || p.theme === filter.theme) && (filter.diff === 0 || p.difficulty === filter.diff);
+      const themeOk = filter.theme === 'all'
+        || (filter.theme === 'forme' ? Math.abs(puzzleRating(p) - stats.puzzleRating) <= 220 : p.theme === filter.theme);
+      return themeOk && (filter.diff === 0 || p.difficulty === filter.diff);
     });
   }
 
@@ -97,7 +99,7 @@ export function createPuzzles(ui) {
 
   function buildFilters() {
     const wrap = $('puzzle-filters');
-    const chips = [['all', 'All']].concat(Object.entries(THEMES).map(([k, v]) => [k, v.name]));
+    const chips = [['all', 'All'], ['forme', 'For my rating']].concat(Object.entries(THEMES).map(([k, v]) => [k, v.name]));
     wrap.innerHTML = chips.map(([k, name]) => `<button type="button" class="chip" data-theme="${k}">${name} <span class="chip-count"></span></button>`).join('');
     wrap.addEventListener('click', (e) => {
       const chip = e.target.closest('[data-theme]');
@@ -134,10 +136,17 @@ export function createPuzzles(ui) {
     document.querySelectorAll('#puzzle-filters .chip').forEach((chip) => {
       const k = chip.dataset.theme;
       chip.classList.toggle('active', k === filter.theme);
-      const c = k === 'all' ? { n: PUZZLE_SET.length, s: solvedAll } : counts[k] || { n: 0, s: 0 };
+      let c = k === 'all' ? { n: PUZZLE_SET.length, s: solvedAll } : counts[k] || { n: 0, s: 0 };
+      if (k === 'forme') {
+        const mine = PUZZLE_SET.filter((p) => Math.abs(puzzleRating(p) - stats.puzzleRating) <= 220);
+        c = { n: mine.length, s: mine.filter((p) => stats.puzzles[p.id]).length };
+      }
       chip.querySelector('.chip-count').textContent = `${c.s}/${c.n}`;
       chip.hidden = c.n === 0;
     });
+    const prov = stats.puzzleRated < PROVISIONAL_PUZZLES ? '?' : '';
+    $('puzzle-rating').textContent = `Puzzle rating ${stats.puzzleRating}${prov}`;
+    $('puzzle-rating').title = prov ? `Provisional until ${PROVISIONAL_PUZZLES} rated attempts (${stats.puzzleRated} so far). Peak ${stats.puzzlePeak}.` : `Peak ${stats.puzzlePeak}.`;
     document.querySelectorAll('#puzzle-diff [data-diff]').forEach((b) => b.classList.toggle('active', Number(b.dataset.diff) === filter.diff));
     $('puzzle-progress').style.width = `${(solvedAll / PUZZLE_SET.length) * 100}%`;
     $('puzzle-progress-text').textContent = `${solvedAll} of ${PUZZLE_SET.length} solved`;
@@ -165,8 +174,10 @@ export function createPuzzles(ui) {
   function load(i) {
     index = i;
     const p = current();
-    P = { game: E.newGame(boardOf(p), p.turn), selected: -1, solved: false, busy: false, hints: 0 };
+    P = { game: E.newGame(boardOf(p), p.turn), selected: -1, solved: false, busy: false, hints: 0, failed: false, assisted: false };
     $('puzzle-title').textContent = `${i + 1}. ${p.title}`;
+    const attempted = stats.puzzleAttempts[p.id];
+    $('puzzle-prating').textContent = `Rated ${puzzleRating(p)}${attempted ? attempted === 'win' ? ' · solved first try' : ' · attempted' : ''}`;
     $('puzzle-theme').textContent = THEMES[p.theme] ? THEMES[p.theme].name : p.theme;
     $('puzzle-diffdots').textContent = '●'.repeat(p.difficulty) + '○'.repeat(3 - p.difficulty);
     $('puzzle-diffdots').title = ['', 'Easy', 'Medium', 'Hard'][p.difficulty];
@@ -234,7 +245,13 @@ export function createPuzzles(ui) {
     if (p.solutions.includes(text)) {
       P.solved = true;
       sound.play('win');
-      setFeedback(`${text} is right. ${p.explain}`, 'good');
+      let ratingText = '';
+      if (!P.failed && !P.assisted && !rush) {
+        const r = recordPuzzleAttempt(stats, p, true);
+        if (r.first) ratingText = ` Rating ${r.delta >= 0 ? '+' : ''}${r.delta} (${r.rating}).`;
+        (r.earned || []).forEach((b) => ui.badge(b));
+      }
+      setFeedback(`${text} is right.${ratingText} ${p.explain}`, 'good');
       $('puzzle-line').textContent = p.line && p.line.split(' ').length > 1 ? `Engine line: ${p.line}` : '';
       const first = !stats.puzzles[p.id];
       const earned = recordPuzzle(stats, p.id, PUZZLE_SET.length);
@@ -242,12 +259,20 @@ export function createPuzzles(ui) {
       if (first) confetti(undefined, 60);
       syncFilters();
       buildGrid();
+      $('puzzle-prating').textContent = `Rated ${puzzleRating(p)} · solved`;
       if (rush) rushSolved();
     } else {
       P.busy = true;
       sound.play('error');
       const why = p.refute && p.refute[text] ? p.refute[text] : 'That does not work here.';
-      setFeedback(`${text}? ${why}`, 'bad');
+      let ratingText = '';
+      if (!P.failed && !P.assisted && !rush) {
+        const r = recordPuzzleAttempt(stats, p, false);
+        if (r.first) ratingText = ` Rating ${r.delta} (${r.rating}).`;
+        syncFilters();
+      }
+      P.failed = true;
+      setFeedback(`${text}? ${why}${ratingText}`, 'bad');
       if (rush) rushMissed();
       setTimeout(() => {
         P.game = before;
@@ -259,6 +284,7 @@ export function createPuzzles(ui) {
 
   function hint() {
     if (P.solved) return;
+    P.assisted = true;
     P.hints = Math.min(2, P.hints + 1);
     const p = current();
     const piece = E.TYPE_NAMES[E.typeOf(boardOf(p)[E.parseCell(p.solutions[0].slice(0, 2))])];
@@ -268,7 +294,13 @@ export function createPuzzles(ui) {
 
   function showSolution() {
     const p = current();
+    if (!P.solved && !P.failed && !P.assisted && !rush) {
+      const r = recordPuzzleAttempt(stats, p, false);
+      if (r.first) ui.toast(`Solution viewed: rating ${r.delta} (${r.rating}).`);
+      syncFilters();
+    }
     load(index);
+    P.assisted = true;
     const g = P.game;
     const m = E.legalMoves(g.board, g.turn).find((mv) => E.notation(g.board, mv) === p.solutions[0]);
     if (m === undefined) return;
@@ -365,10 +397,9 @@ export function createPuzzles(ui) {
     rush = null;
     $('rush-bar').hidden = true;
     if (!finished) return;
-    const best = Math.max(stats.rushBest || 0, score);
     const record = score > (stats.rushBest || 0);
-    stats.rushBest = best;
-    saveStats(stats);
+    recordRush(stats, score).forEach((b) => ui.badge(b));
+    const best = stats.rushBest;
     syncFilters();
     $('rush-result').textContent = `${score} solved`;
     $('rush-result-sub').textContent = record ? 'A new personal best.' : `Your best is ${best}.`;
