@@ -494,34 +494,74 @@
   <div class="section-head" style="margin-top:0">
     <div>
       <h1 style="margin-bottom:0.2rem">Puzzles</h1>
-      <p class="lead" style="margin:0">Short positions with one decisive idea each, checked by the engine. Click a piece, then a square, or drag it.</p>
+      <p class="lead" style="margin:0">Positions with exactly one right move, every one checked by the engine. Wrong answers get told why. Click a piece then a square, or drag.</p>
+    </div>
+    <div class="row">
+      <button id="puzzle-daily-btn" class="btn" type="button"><svg><use href="#i-star"/></svg>Today's puzzle</button>
+      <button id="puzzle-rush-btn" class="btn primary" type="button"><svg><use href="#i-play"/></svg>Puzzle rush</button>
     </div>
   </div>
-  <div class="row" style="margin:0.8rem 0 1rem; gap:1rem">
+  <div class="row" style="margin:0.8rem 0 0.8rem; gap:1rem">
     <div style="flex:1; min-width:200px"><div class="progress"><i id="puzzle-progress" style="width:0%"></i></div></div>
     <span class="muted small" id="puzzle-progress-text">0 solved</span>
+    <span class="muted small" id="puzzle-rush-best"></span>
+  </div>
+  <div class="puzzle-filters" id="puzzle-filters"></div>
+  <div class="row" style="margin:0.4rem 0 1rem">
+    <span class="muted small">Difficulty</span>
+    <div class="seg" id="puzzle-diff">
+      <button type="button" data-diff="0" class="active">Any</button>
+      <button type="button" data-diff="1">Easy</button>
+      <button type="button" data-diff="2">Medium</button>
+      <button type="button" data-diff="3">Hard</button>
+    </div>
+  </div>
+  <div id="rush-bar" class="card rush-bar" hidden>
+    <span class="rush-label">Puzzle rush</span>
+    <span class="rush-time" id="rush-time">3:00</span>
+    <span class="rush-score"><strong id="rush-score">0</strong> solved</span>
+    <span class="rush-strikes" id="rush-strikes">···</span>
+    <button id="rush-stop" class="btn small" type="button">Stop</button>
   </div>
   <div class="puzzle-layout">
     <div class="board-column">
       <div id="puzzle-board"></div>
+      <div id="rush-overlay" class="overlay" hidden>
+        <div class="card">
+          <h3 id="rush-result">0 solved</h3>
+          <p id="rush-result-sub"></p>
+          <div class="row"><button class="btn primary" id="rush-overlay-close" type="button">Back to puzzles</button></div>
+        </div>
+      </div>
     </div>
     <aside class="panel">
       <div class="card">
-        <div class="puzzle-nav" id="puzzle-nav"></div>
         <div class="row between">
-          <h3 id="puzzle-title" style="margin:0.2rem 0"></h3>
-          <span class="daily" id="puzzle-daily" hidden><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-star"/></svg>Today's puzzle</span>
+          <span class="puzzle-theme" id="puzzle-theme"></span>
+          <span class="row" style="gap:0.5rem">
+            <span class="daily" id="puzzle-daily" hidden><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-star"/></svg>Today's</span>
+            <span class="puzzle-diffdots" id="puzzle-diffdots" title="Difficulty"></span>
+          </span>
         </div>
-        <p id="puzzle-turn" class="muted small"></p>
-        <p id="puzzle-prompt"></p>
+        <h3 id="puzzle-title" style="margin:0.3rem 0"></h3>
+        <p id="puzzle-turn" class="muted small" style="margin:0 0 0.4rem"></p>
+        <p id="puzzle-prompt" style="margin:0 0 0.6rem"></p>
         <div id="puzzle-feedback" class="feedback" aria-live="polite"></div>
+        <div id="puzzle-line" class="muted small" style="margin-top:0.4rem"></div>
         <div class="row" style="margin-top:0.7rem">
           <button id="puzzle-hint" class="btn small" type="button">Hint</button>
           <button id="puzzle-reset" class="btn small" type="button">Reset</button>
           <button id="puzzle-solution" class="btn small" type="button">Show solution</button>
           <button id="puzzle-play" class="btn small" type="button" title="Continue this position against the computer">Play it out</button>
-          <button id="puzzle-next" class="btn small primary" type="button">Next</button>
         </div>
+        <div class="row" style="margin-top:0.5rem">
+          <button id="puzzle-next" class="btn small primary" type="button">Next unsolved</button>
+          <button id="puzzle-random" class="btn small" type="button">Random</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Puzzles <span id="puzzle-count" class="muted"></span></h2>
+        <div class="puzzle-grid" id="puzzle-grid"></div>
       </div>
     </aside>
   </div>

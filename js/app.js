@@ -2,7 +2,8 @@
 
 import * as E from './engine.js';
 import { createBoard } from './board.js';
-import { DIAGRAMS, PUZZLES } from './lessons.js';
+import { DIAGRAMS } from './lessons.js';
+import { PUZZLE_SET } from './puzzledata.js';
 import { createGame } from './game.js';
 import { createPuzzles } from './puzzles.js';
 import { createTutorial } from './tutorial.js';
@@ -48,6 +49,7 @@ function badge(b) {
   sound.play('badge');
   toast(`Badge earned: ${b.name}. ${b.desc}`, 'badge-toast');
   game.refreshStats();
+  puzzles.refreshStats();
 }
 
 // Theme -------------------------------------------------------------------
@@ -292,7 +294,7 @@ initKeysDialog();
 initDiagrams();
 initKeyboard();
 demo = createDemo($('demo-board'), $('demo-caption'));
-$('home-puzzle-count').textContent = PUZZLES.length;
+$('home-puzzle-count').textContent = PUZZLE_SET.length;
 game.init();
 refreshTutorialBanner();
 

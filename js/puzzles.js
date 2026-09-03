@@ -1,34 +1,65 @@
-// Puzzle page: navigation, daily puzzle, feedback, progress, play it out.
+// Puzzle page: themed sets, filters, daily puzzle, rush mode, specific
+// feedback for wrong moves, and play-it-out.
 
 import * as E from './engine.js';
 import { createBoard } from './board.js';
-import { PUZZLES, boardFrom } from './lessons.js';
+import { PUZZLE_SET } from './puzzledata.js';
 import { sound } from './sound.js';
-import { loadStats, recordPuzzle } from './stats.js';
+import { confetti } from './fx.js';
+import { loadStats, saveStats, recordPuzzle } from './stats.js';
 
 const $ = (id) => document.getElementById(id);
+
+export const THEMES = {
+  race: { name: 'Win the race', desc: 'Get to the far corner first.' },
+  block: { name: 'Block the corner', desc: 'Passive defence with the right piece.' },
+  stop: { name: 'Stop the runner', desc: 'Active defence: capture the attacker.' },
+  corner: { name: 'Capture into the corner', desc: 'The corner is occupied. Take it.' },
+  fork: { name: 'Forks', desc: 'Attack two pieces at once.' },
+  trap: { name: 'Traps', desc: 'Leave a piece no safe square.' },
+  box: { name: 'No moves left', desc: 'Win by leaving the other side unable to move.' },
+  capture: { name: 'Win a piece', desc: 'Clean captures.' },
+  material: { name: 'Win material', desc: 'Force a gain of material.' },
+  only: { name: 'Only move', desc: 'Everything else loses.' },
+};
 
 function cap(s) {
   return s[0].toUpperCase() + s.slice(1);
 }
 
+export function boardOf(p) {
+  return Uint8Array.from(p.board, (ch) => Number(ch));
+}
+
 export function dailyIndex() {
   const day = Math.floor(Date.now() / 86400000);
-  return day % PUZZLES.length;
+  return day % PUZZLE_SET.length;
 }
 
 export function createPuzzles(ui) {
   let board = null;
   let index = 0;
-  let P = { game: null, selected: -1, solved: false, busy: false };
+  let P = { game: null, selected: -1, solved: false, busy: false, hints: 0 };
+  let filter = { theme: 'all', diff: 0 };
+  let rush = null;
+  let stats = loadStats();
 
-  function puzzleGame(p) {
-    return E.newGame(boardFrom(p.spec), p.turn);
+  function current() {
+    return PUZZLE_SET[index];
+  }
+
+  function visibleIndexes() {
+    return PUZZLE_SET.map((p, i) => i).filter((i) => {
+      const p = PUZZLE_SET[i];
+      return (filter.theme === 'all' || p.theme === filter.theme) && (filter.diff === 0 || p.difficulty === filter.diff);
+    });
   }
 
   function canMoveNow() {
-    return !P.solved && !P.busy && P.game.turn === PUZZLES[index].turn;
+    return !P.solved && !P.busy && P.game.turn === current().turn;
   }
+
+  // Setup ---------------------------------------------------------------
 
   function ensure() {
     if (board) return;
@@ -39,25 +70,115 @@ export function createPuzzles(ui) {
       canDrag: (i) => canMoveNow() && E.ownerOf(P.game.board[i]) === P.game.turn,
       targetsFor: (i) => E.targetsFrom(P.game.board, i),
     });
-    const nav = $('puzzle-nav');
-    PUZZLES.forEach((p, i) => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'btn';
-      b.textContent = String(i + 1);
-      b.title = p.title;
-      b.addEventListener('click', () => load(i));
-      nav.appendChild(b);
-    });
-    $('puzzle-hint').addEventListener('click', () => setFeedback(PUZZLES[index].hint, ''));
+    buildFilters();
+    buildGrid();
+    $('puzzle-hint').addEventListener('click', hint);
     $('puzzle-reset').addEventListener('click', () => load(index));
     $('puzzle-solution').addEventListener('click', showSolution);
-    $('puzzle-next').addEventListener('click', () => load((index + 1) % PUZZLES.length));
+    $('puzzle-next').addEventListener('click', nextUnsolved);
+    $('puzzle-random').addEventListener('click', randomUnsolved);
+    $('puzzle-daily-btn').addEventListener('click', () => {
+      filter = { theme: 'all', diff: 0 };
+      syncFilters();
+      load(dailyIndex());
+    });
     $('puzzle-play').addEventListener('click', () => {
-      const p = PUZZLES[index];
-      ui.playPosition(boardFrom(p.spec), p.turn, p.turn);
+      const p = current();
+      ui.playPosition(boardOf(p), p.turn, p.turn);
+    });
+    $('puzzle-rush-btn').addEventListener('click', startRush);
+    $('rush-stop').addEventListener('click', () => endRush(false));
+    $('rush-overlay-close').addEventListener('click', () => {
+      $('rush-overlay').hidden = true;
+      load(index);
     });
     load(dailyIndex());
+  }
+
+  function buildFilters() {
+    const wrap = $('puzzle-filters');
+    const chips = [['all', 'All']].concat(Object.entries(THEMES).map(([k, v]) => [k, v.name]));
+    wrap.innerHTML = chips.map(([k, name]) => `<button type="button" class="chip" data-theme="${k}">${name} <span class="chip-count"></span></button>`).join('');
+    wrap.addEventListener('click', (e) => {
+      const chip = e.target.closest('[data-theme]');
+      if (!chip) return;
+      filter.theme = chip.dataset.theme;
+      syncFilters();
+      buildGrid();
+      const vis = visibleIndexes();
+      if (vis.length && !vis.includes(index)) load(vis[0]);
+    });
+    $('puzzle-diff').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-diff]');
+      if (!b) return;
+      filter.diff = Number(b.dataset.diff);
+      syncFilters();
+      buildGrid();
+      const vis = visibleIndexes();
+      if (vis.length && !vis.includes(index)) load(vis[0]);
+    });
+    syncFilters();
+  }
+
+  function syncFilters() {
+    const counts = {};
+    let solvedAll = 0;
+    PUZZLE_SET.forEach((p) => {
+      counts[p.theme] = counts[p.theme] || { n: 0, s: 0 };
+      counts[p.theme].n++;
+      if (stats.puzzles[p.id]) {
+        counts[p.theme].s++;
+        solvedAll++;
+      }
+    });
+    document.querySelectorAll('#puzzle-filters .chip').forEach((chip) => {
+      const k = chip.dataset.theme;
+      chip.classList.toggle('active', k === filter.theme);
+      const c = k === 'all' ? { n: PUZZLE_SET.length, s: solvedAll } : counts[k] || { n: 0, s: 0 };
+      chip.querySelector('.chip-count').textContent = `${c.s}/${c.n}`;
+      chip.hidden = c.n === 0;
+    });
+    document.querySelectorAll('#puzzle-diff [data-diff]').forEach((b) => b.classList.toggle('active', Number(b.dataset.diff) === filter.diff));
+    $('puzzle-progress').style.width = `${(solvedAll / PUZZLE_SET.length) * 100}%`;
+    $('puzzle-progress-text').textContent = `${solvedAll} of ${PUZZLE_SET.length} solved`;
+    $('puzzle-rush-best').textContent = stats.rushBest ? `Rush best: ${stats.rushBest}` : '';
+  }
+
+  function buildGrid() {
+    const grid = $('puzzle-grid');
+    const vis = visibleIndexes();
+    grid.innerHTML = vis.map((i) => {
+      const p = PUZZLE_SET[i];
+      const solved = !!stats.puzzles[p.id];
+      const cls = ['pg', solved ? 'solved' : '', i === index ? 'current' : '', i === dailyIndex() ? 'daily' : ''].join(' ');
+      return `<button type="button" class="${cls}" data-i="${i}" title="${p.title} · ${'●'.repeat(p.difficulty)}">${i + 1}</button>`;
+    }).join('');
+    $('puzzle-count').textContent = `${vis.length}`;
+    grid.onclick = (e) => {
+      const b = e.target.closest('[data-i]');
+      if (b) load(Number(b.dataset.i));
+    };
+  }
+
+  // Loading and rendering ------------------------------------------------
+
+  function load(i) {
+    index = i;
+    const p = current();
+    P = { game: E.newGame(boardOf(p), p.turn), selected: -1, solved: false, busy: false, hints: 0 };
+    $('puzzle-title').textContent = `${i + 1}. ${p.title}`;
+    $('puzzle-theme').textContent = THEMES[p.theme] ? THEMES[p.theme].name : p.theme;
+    $('puzzle-diffdots').textContent = '●'.repeat(p.difficulty) + '○'.repeat(3 - p.difficulty);
+    $('puzzle-diffdots').title = ['', 'Easy', 'Medium', 'Hard'][p.difficulty];
+    $('puzzle-turn').textContent = `${cap(E.PLAYER_NAMES[p.turn])} to move.${p.winIn ? ` Win in ${p.winIn}.` : ''}`;
+    $('puzzle-prompt').textContent = p.prompt;
+    $('puzzle-daily').hidden = i !== dailyIndex();
+    $('puzzle-line').textContent = '';
+    setFeedback('', '');
+    document.querySelectorAll('#puzzle-grid .pg').forEach((b) => b.classList.toggle('current', Number(b.dataset.i) === i));
+    const cur = document.querySelector('#puzzle-grid .pg.current');
+    if (cur) cur.scrollIntoView({ block: 'nearest' });
+    render();
   }
 
   function setFeedback(text, kind) {
@@ -66,55 +187,29 @@ export function createPuzzles(ui) {
     el.className = 'feedback' + (kind ? ' ' + kind : '');
   }
 
-  function renderProgress() {
-    const stats = loadStats();
-    const solved = PUZZLES.filter((p) => stats.puzzles[p.id]).length;
-    $('puzzle-progress').style.width = `${(solved / PUZZLES.length) * 100}%`;
-    $('puzzle-progress-text').textContent = `${solved} of ${PUZZLES.length} solved`;
-    document.querySelectorAll('#puzzle-nav .btn').forEach((b, j) => {
-      b.classList.toggle('active', j === index);
-      b.classList.toggle('solved', !!stats.puzzles[PUZZLES[j].id]);
-    });
-  }
-
-  function load(i) {
-    index = i;
-    const p = PUZZLES[i];
-    P = { game: puzzleGame(p), selected: -1, solved: false, busy: false };
-    $('puzzle-title').textContent = `${i + 1}. ${p.title}`;
-    $('puzzle-turn').textContent = `${cap(E.PLAYER_NAMES[p.turn])} to move.`;
-    $('puzzle-prompt').textContent = p.prompt;
-    $('puzzle-daily').hidden = i !== dailyIndex();
-    setFeedback('', '');
-    renderProgress();
-    render();
-  }
-
   function render(animate) {
     const g = P.game;
-    const targets = P.selected >= 0 ? E.targetsFrom(g.board, P.selected) : [];
+    const p = current();
+    const hintFrom = P.hints >= 1 ? E.parseCell(p.solutions[0].slice(0, 2)) : -1;
+    const hintTo = P.hints >= 2 ? E.parseCell(p.solutions[0].slice(3, 5)) : -1;
     board.render(g.board, {
       selected: P.selected,
-      targets,
+      targets: P.selected >= 0 ? E.targetsFrom(g.board, P.selected) : [],
       lastMove: g.moves.length ? { from: E.moveFrom(g.moves.at(-1).m), to: E.moveTo(g.moves.at(-1).m) } : null,
-      rings: PUZZLES[index].turn,
+      rings: p.turn,
+      hint: !P.solved && hintFrom >= 0 ? { from: hintFrom, to: hintTo } : null,
       draggable: (i) => canMoveNow() && E.ownerOf(g.board[i]) === g.turn,
       animate,
     });
   }
 
+  // Interaction -----------------------------------------------------------
+
   function onCell(i, info = {}) {
     const g = P.game;
     if (!canMoveNow()) return;
-    if (info.dragStart) {
-      P.selected = i;
-      render();
-      return;
-    }
-    if (info.dragCancel) {
-      render();
-      return;
-    }
+    if (info.dragStart) { P.selected = i; render(); return; }
+    if (info.dragCancel) { render(); return; }
     if (P.selected >= 0 && E.canMove(g.board, P.selected, i)) {
       tryMove(E.packMove(P.selected, i), true);
       return;
@@ -126,7 +221,7 @@ export function createPuzzles(ui) {
   }
 
   function tryMove(m, slide) {
-    const p = PUZZLES[index];
+    const p = current();
     const g = P.game;
     const from = E.moveFrom(m);
     const to = E.moveTo(m);
@@ -140,23 +235,39 @@ export function createPuzzles(ui) {
       P.solved = true;
       sound.play('win');
       setFeedback(`${text} is right. ${p.explain}`, 'good');
-      const earned = recordPuzzle(loadStats(), p.id, PUZZLES.length);
+      $('puzzle-line').textContent = p.line && p.line.split(' ').length > 1 ? `Engine line: ${p.line}` : '';
+      const first = !stats.puzzles[p.id];
+      const earned = recordPuzzle(stats, p.id, PUZZLE_SET.length);
       earned.forEach((b) => ui.badge(b));
-      renderProgress();
+      if (first) confetti(undefined, 60);
+      syncFilters();
+      buildGrid();
+      if (rush) rushSolved();
     } else {
       P.busy = true;
       sound.play('error');
-      setFeedback(`${text}? ${p.wrong}`, 'bad');
+      const why = p.refute && p.refute[text] ? p.refute[text] : 'That does not work here.';
+      setFeedback(`${text}? ${why}`, 'bad');
+      if (rush) rushMissed();
       setTimeout(() => {
         P.game = before;
         P.busy = false;
         render();
-      }, 900);
+      }, 1000);
     }
   }
 
+  function hint() {
+    if (P.solved) return;
+    P.hints = Math.min(2, P.hints + 1);
+    const p = current();
+    const piece = E.TYPE_NAMES[E.typeOf(boardOf(p)[E.parseCell(p.solutions[0].slice(0, 2))])];
+    setFeedback(P.hints === 1 ? `Look at the ${piece} on ${p.solutions[0].slice(0, 2)}.` : `Move it to ${p.solutions[0].slice(3, 5)}.`, '');
+    render();
+  }
+
   function showSolution() {
-    const p = PUZZLES[index];
+    const p = current();
     load(index);
     const g = P.game;
     const m = E.legalMoves(g.board, g.turn).find((mv) => E.notation(g.board, mv) === p.solutions[0]);
@@ -169,7 +280,110 @@ export function createPuzzles(ui) {
     render({ from, to, captured });
     const others = p.solutions.length > 1 ? ` ${p.solutions.slice(1).join(' and ')} also work${p.solutions.length === 2 ? 's' : ''}.` : '';
     setFeedback(`${p.solutions[0]}. ${p.explain}${others}`, 'good');
+    $('puzzle-line').textContent = p.line && p.line.split(' ').length > 1 ? `Engine line: ${p.line}` : '';
+    if (rush) rushMissed();
   }
 
-  return { ensure, load, get index() { return index; } };
+  function nextUnsolved() {
+    const vis = visibleIndexes();
+    if (!vis.length) return;
+    const pos = vis.indexOf(index);
+    for (let k = 1; k <= vis.length; k++) {
+      const i = vis[(pos + k) % vis.length];
+      if (!stats.puzzles[PUZZLE_SET[i].id]) { load(i); return; }
+    }
+    load(vis[(pos + 1) % vis.length]);
+  }
+
+  function randomUnsolved() {
+    const vis = visibleIndexes();
+    const pool = vis.filter((i) => !stats.puzzles[PUZZLE_SET[i].id] && i !== index);
+    const from = pool.length ? pool : vis.filter((i) => i !== index);
+    if (!from.length) return;
+    load(from[Math.floor(Math.random() * from.length)]);
+  }
+
+  // Rush ------------------------------------------------------------------
+
+  function startRush() {
+    const order = PUZZLE_SET.map((p, i) => i).sort(() => Math.random() - 0.5);
+    rush = { order, pos: 0, score: 0, strikes: 0, endsAt: Date.now() + 180000, timer: null };
+    $('rush-bar').hidden = false;
+    $('rush-overlay').hidden = true;
+    filter = { theme: 'all', diff: 0 };
+    syncFilters();
+    buildGrid();
+    load(rush.order[0]);
+    renderRush();
+    rush.timer = setInterval(() => {
+      renderRush();
+      if (Date.now() >= rush.endsAt) endRush(true);
+    }, 250);
+    ui.toast('Puzzle rush: three minutes, three strikes. Go.');
+  }
+
+  function renderRush() {
+    if (!rush) return;
+    const left = Math.max(0, rush.endsAt - Date.now());
+    const m = Math.floor(left / 60000);
+    const s = Math.floor((left % 60000) / 1000);
+    $('rush-time').textContent = `${m}:${String(s).padStart(2, '0')}`;
+    $('rush-score').textContent = rush.score;
+    $('rush-strikes').textContent = '✕'.repeat(rush.strikes) + '·'.repeat(3 - rush.strikes);
+  }
+
+  function rushSolved() {
+    rush.score += 1;
+    renderRush();
+    setTimeout(() => {
+      if (!rush) return;
+      rush.pos += 1;
+      if (rush.pos >= rush.order.length) endRush(true);
+      else load(rush.order[rush.pos]);
+    }, 900);
+  }
+
+  function rushMissed() {
+    rush.strikes += 1;
+    renderRush();
+    if (rush.strikes >= 3) {
+      setTimeout(() => endRush(true), 1000);
+      return;
+    }
+    setTimeout(() => {
+      if (!rush) return;
+      rush.pos += 1;
+      if (rush.pos >= rush.order.length) endRush(true);
+      else load(rush.order[rush.pos]);
+    }, 1200);
+  }
+
+  function endRush(finished) {
+    if (!rush) return;
+    clearInterval(rush.timer);
+    const score = rush.score;
+    rush = null;
+    $('rush-bar').hidden = true;
+    if (!finished) return;
+    const best = Math.max(stats.rushBest || 0, score);
+    const record = score > (stats.rushBest || 0);
+    stats.rushBest = best;
+    saveStats(stats);
+    syncFilters();
+    $('rush-result').textContent = `${score} solved`;
+    $('rush-result-sub').textContent = record ? 'A new personal best.' : `Your best is ${best}.`;
+    $('rush-overlay').hidden = false;
+    if (record && score > 0) confetti();
+    sound.play(score > 0 ? 'win' : 'draw');
+  }
+
+  function refreshStats() {
+    stats = loadStats();
+    if (board) {
+      syncFilters();
+      buildGrid();
+    }
+  }
+
+  return { ensure, load, refreshStats, get index() { return index; } };
 }

@@ -335,3 +335,24 @@ test('endgame and lab positions are playable', () => {
   }
   assert.ok(DIAGRAMS.opening.targets.length === 3);
 });
+
+import { PUZZLE_SET } from '../js/puzzledata.js';
+
+test('shipped puzzles are well formed and their solutions are legal', () => {
+  const ids = new Set();
+  for (const p of PUZZLE_SET) {
+    assert.ok(!ids.has(p.id), `duplicate id ${p.id}`);
+    ids.add(p.id);
+    assert.equal(p.board.length, 81, p.id);
+    const board = Uint8Array.from(p.board, (c) => Number(c));
+    // A piece may sit in its own corner (a passive block), never in the enemy's.
+    assert.ok(!board[HOME[0]] || ownerOf(board[HOME[0]]) === BLUE, `${p.id}: a1`);
+    assert.ok(!board[HOME[1]] || ownerOf(board[HOME[1]]) === RED, `${p.id}: i9`);
+    const legal = legalMoves(board, p.turn).map((m) => notation(board, m));
+    assert.ok(p.solutions.length >= 1, p.id);
+    for (const s of p.solutions) assert.ok(legal.includes(s), `${p.id}: ${s}`);
+    assert.ok([1, 2, 3].includes(p.difficulty), p.id);
+    assert.ok(p.explain.length > 30, p.id);
+    for (const wrong of Object.keys(p.refute)) assert.ok(legal.includes(wrong) && !p.solutions.includes(wrong), `${p.id}: refute ${wrong}`);
+  }
+});

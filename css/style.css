@@ -2401,3 +2401,143 @@ footer {
     max-width: 360px;
   }
 }
+
+/* Puzzle page additions */
+
+.puzzle-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.chip {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.chip:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.chip-count {
+  font-size: 0.72rem;
+  opacity: 0.8;
+  font-variant-numeric: tabular-nums;
+}
+
+.puzzle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
+  gap: 0.3rem;
+  max-height: 260px;
+  overflow: auto;
+  padding: 2px;
+}
+
+.pg {
+  aspect-ratio: 1;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  border-radius: 9px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  position: relative;
+  color: var(--muted);
+  padding: 0;
+}
+
+.pg:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.pg.solved {
+  background: color-mix(in srgb, var(--ok) 22%, var(--surface));
+  border-color: color-mix(in srgb, var(--ok) 50%, var(--border));
+  color: var(--text);
+}
+
+.pg.current {
+  outline: 3px solid var(--accent);
+  outline-offset: -1px;
+  color: var(--text);
+}
+
+.pg.daily::after {
+  content: "";
+  position: absolute;
+  right: -3px;
+  top: -3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--gold);
+  border: 2px solid var(--surface);
+}
+
+.puzzle-theme {
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+.puzzle-diffdots {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--warn);
+}
+
+.rush-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 1rem;
+  margin-bottom: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.rush-label {
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  color: var(--accent);
+}
+
+.rush-time {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.rush-score strong {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+}
+
+.rush-strikes {
+  color: var(--red);
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  margin-left: auto;
+}

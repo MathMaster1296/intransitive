@@ -33,9 +33,13 @@ captures is a draw.
   overlay, a rings overlay, board flipping, and move-by-move review.
 - A one-minute interactive tutorial, a home page demo game, rules and
   strategy pages with diagrams, and strategy tips on the play page.
-- Puzzles with one decisive idea each, all checked with the search, a
-  featured daily puzzle, and a button to play any puzzle position out
-  against the computer.
+- A large puzzle set mined from the engine: positions with exactly one
+  winning or saving move, grouped by theme (races, blocks, stopping a
+  runner, forks, traps, and more) and rated by difficulty. Wrong answers
+  get a specific refutation, solved puzzles show the engine's line, and
+  there is a daily puzzle, a three-minute puzzle rush, and a button to play
+  any position out against the computer. `node tools/verify.mjs` re-checks
+  every shipped puzzle.
 - A local rating, win-loss record, streaks and badges, stored only in your
   browser.
 - Share links that replay a whole game, sound effects, confetti, keyboard
@@ -58,6 +62,9 @@ Tests use the Node test runner:
 
 ```bash
 node --test test/test.mjs
+tools/mine.mjs     mines candidate puzzles from self-play and random positions
+tools/curate.mjs   verifies, themes and explains them into js/puzzledata.js
+tools/verify.mjs   re-checks every shipped puzzle
 ```
 
 ## Layout
@@ -74,13 +81,18 @@ js/game.js         the play page
 js/puzzles.js      the puzzles page
 js/tutorial.js     the guided tutorial
 js/home.js         the demo game on the home page
-js/lessons.js      diagram positions, puzzles, tutorial steps, tips
+js/lessons.js      diagram positions, guide data, tutorial steps, tips
+js/puzzledata.js   the puzzle set (generated)
+js/strategy.js     the strategy guide
 js/stats.js        rating, record and badges
 js/sound.js        synthesised sound effects
 js/fx.js           confetti
 js/app.js          routing, theme, dialogs, boot
 sw.js              offline cache
 test/test.mjs
+tools/mine.mjs     mines candidate puzzles from self-play and random positions
+tools/curate.mjs   verifies, themes and explains them into js/puzzledata.js
+tools/verify.mjs   re-checks every shipped puzzle
 ```
 
 ## Licence
