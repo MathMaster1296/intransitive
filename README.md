@@ -7,9 +7,7 @@ solve the puzzles.
 
 **Live at [mathmaster1296.github.io/intransitive](https://mathmaster1296.github.io/intransitive/).**
 
-This is a fan-made site and is not affiliated with the game's designer. The
-official site, with online play, ratings and tournaments, is
-[meaf.us/rps2](https://meaf.us/rps2/), built by Meaf.
+This is a fan-made site and is not affiliated with the game's designer.
 
 ## The game
 
@@ -22,9 +20,9 @@ captures is a draw.
 
 ## What is here
 
-- A rules engine that matches the official implementation, including the
-  edge cases, and uses the same move notation, so games can be copied
-  between the two sites.
+- A rules engine that follows the game's rules exactly, including the
+  edge cases, with a chess-style move notation so games can be copied and
+  pasted.
 - A computer opponent with three levels: an alpha-beta search with a
   capture-only quiescence search, running in a Web Worker. The evaluation
   is the game's strategy advice written down: material, matchup (a side with no

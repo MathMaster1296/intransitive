@@ -340,7 +340,7 @@ export function resultToken(result) {
   return '0-0';
 }
 
-// Move list in the same notation the official site uses, such as
+// Move list in chess-style notation, such as
 // "1. c5-d6 e7-d6 2. d4xd5 ...".
 export function movesText(game) {
   const parts = [];

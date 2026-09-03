@@ -252,7 +252,7 @@
 
   <div class="prose">
     <h2>Notation</h2>
-    <p>Moves are written as the starting square, a dash or an x for a capture, and the destination, so <code>c5-d6</code> is a quiet move and <code>d6xd7</code> is a capture. Moves are numbered in pairs the way chess does it. The move list on the play page uses this format, and the Moves button lets you copy a game out or paste one in, so games travel between this site and the official one.</p>
+    <p>Moves are written as the starting square, a dash or an x for a capture, and the destination, so <code>c5-d6</code> is a quiet move and <code>d6xd7</code> is a capture. Moves are numbered in pairs the way chess does it. The move list on the play page uses this format, and the Moves button lets you copy a game out or paste one in.</p>
   </div>
 </section>
 
@@ -349,21 +349,13 @@
 
 <section id="view-about" class="view" hidden>
   <h1>About</h1>
-  <p class="lead">This is a fan-made site for playing Intransitive and learning its strategy. It is not the official site and it is not affiliated with the game's designer.</p>
-
-  <div class="prose">
-    <h2>Play online</h2>
-    <p>For rated games against other people, tournaments, and an analysis workshop, use the official site built by Meaf.</p>
-  </div>
-  <div class="links">
-    <a class="card" href="https://meaf.us/rps2/"><strong>Official site</strong><span class="muted small">meaf.us/rps2, online play with accounts, ratings and tournaments</span></a>
-  </div>
+  <p class="lead">This is a fan-made site for playing Intransitive and learning its strategy. It is not affiliated with the game's designer.</p>
 
   <div class="prose">
     <h2>About this site</h2>
-    <p>The site is plain HTML, CSS and JavaScript with no build step, and it runs entirely in your browser. The rules engine follows the official implementation exactly, including the no-stalemate rule and the draw after 100 moves without a capture, and it uses the same move notation, so games can be copied between the two sites. It works offline once it has loaded, and you can install it to your home screen.</p>
+    <p>The site is plain HTML, CSS and JavaScript with no build step, and it runs entirely in your browser. The rules engine follows the game's rules exactly, including the no-stalemate rule and the draw after 100 moves without a capture. It works offline once it has loaded, and you can install it to your home screen.</p>
     <p>The computer opponent is an alpha-beta search that runs in a background thread. Its evaluation is a direct translation of the strategy notes: it counts material, penalises lopsided distributions, rewards pieces that are closer to the enemy corner, and checks whether any runner can still be stopped using the ring rule. Easy looks two moves ahead and makes deliberate mistakes, medium looks four moves ahead, and hard searches as deep as it can in about two seconds. The same search drives the evaluation bar, the hints, the move ratings and the puzzle checks.</p>
-    <p>Your games, stats and badges are stored in your browser only. Nothing is sent anywhere. Source code is on <a href="https://github.com/MathMaster1296/intransitive">GitHub</a> under the MIT licence. If you find a rules mismatch with the official site, open an issue.</p>
+    <p>Your games, stats and badges are stored in your browser only. Nothing is sent anywhere. Source code is on <a href="https://github.com/MathMaster1296/intransitive">GitHub</a> under the MIT licence. If you find a rules mistake, open an issue.</p>
   </div>
 </section>
 
@@ -413,7 +405,7 @@
 
 <dialog id="dlg-moves">
   <h2>Moves</h2>
-  <p class="small muted">The move list below uses the same notation as the official site. Copy it to save the game, or paste a list and load it to replay a game from the start.</p>
+  <p class="small muted">Copy the move list to save the game, or paste a list and load it to replay a game from the start.</p>
   <textarea id="moves-text" spellcheck="false"></textarea>
   <div class="error" id="moves-error"></div>
   <div class="dialog-actions">
