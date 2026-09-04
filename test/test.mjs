@@ -403,3 +403,34 @@ test('two-player games rate both named players', () => {
   assert.ok(lb[0].rating >= lb[1].rating);
   assert.deepEqual(stats.lastNames, { blue: 'Ann', red: 'Ben' });
 });
+
+import { rankMoves, STYLES, setStyle } from '../js/ai.js';
+import { encodePosition, decodePosition, applyMove } from '../js/engine.js';
+
+test('position links round trip', () => {
+  const board = startingBoard();
+  const code = encodePosition(board, RED);
+  assert.match(code, /^r[0-9a-z]+$/);
+  const back = decodePosition(code);
+  assert.equal(back.turn, RED);
+  assert.deepEqual(Array.from(back.board), Array.from(board));
+  assert.throws(() => decodePosition('xyz'), /not a position/);
+  const won = new Uint8Array(81);
+  won[0] = piece(RED, ROCK);
+  assert.throws(() => decodePosition(encodePosition(won, BLUE)), /already been won/);
+});
+
+test('rankMoves orders the immediate win first and personalities change scores', () => {
+  const board = boardFrom({ blue: { S: ['h8', 'b2'] }, red: { R: ['a3'], P: ['d5'] } });
+  const rows = rankMoves(board, BLUE, 0, { maxDepth: 2, timeMs: 200, top: 3 });
+  assert.equal(cellName(rows[0].move % 81), 'i9');
+  assert.ok(rows[0].score > rows[1].score);
+  const start = startingBoard();
+  setStyle('aggressive');
+  const a = evaluate(applyMove(start, packMove(parseCell('d4'), parseCell('e5'))), RED);
+  setStyle('balanced');
+  const b = evaluate(applyMove(start, packMove(parseCell('d4'), parseCell('e5'))), RED);
+  assert.notEqual(a, b);
+  assert.ok(Object.keys(STYLES).length === 4);
+  assert.equal(describeResult({ winner: RED, reason: 'timeout' }), 'Red wins on time.');
+});

@@ -6,7 +6,7 @@ import { createBoard } from './board.js';
 import { PUZZLE_SET } from './puzzledata.js';
 import { sound } from './sound.js';
 import { confetti } from './fx.js';
-import { loadStats, recordPuzzle, recordPuzzleAttempt, recordRush, puzzleRating, PROVISIONAL_PUZZLES } from './stats.js';
+import { loadStats, recordPuzzle, recordPuzzleAttempt, recordRush, recordStreak, recordDaily, dailyStreak, dayKey, puzzleRating, PROVISIONAL_PUZZLES } from './stats.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -42,6 +42,7 @@ export function createPuzzles(ui) {
   let P = { game: null, selected: -1, solved: false, busy: false, hints: 0 };
   let filter = { theme: 'all', diff: 0 };
   let rush = null;
+  let streak = null;
   let stats = loadStats();
 
   function current() {
@@ -52,7 +53,9 @@ export function createPuzzles(ui) {
     return PUZZLE_SET.map((p, i) => i).filter((i) => {
       const p = PUZZLE_SET[i];
       const themeOk = filter.theme === 'all'
-        || (filter.theme === 'forme' ? Math.abs(puzzleRating(p) - stats.puzzleRating) <= 220 : p.theme === filter.theme);
+        || (filter.theme === 'forme' ? Math.abs(puzzleRating(p) - stats.puzzleRating) <= 220
+          : filter.theme === 'review' ? stats.puzzleAttempts[p.id] === 'loss' && !stats.puzzles[p.id]
+            : p.theme === filter.theme);
       return themeOk && (filter.diff === 0 || p.difficulty === filter.diff);
     });
   }
@@ -89,6 +92,8 @@ export function createPuzzles(ui) {
       ui.playPosition(boardOf(p), p.turn, p.turn);
     });
     $('puzzle-rush-btn').addEventListener('click', startRush);
+    $('puzzle-streak-btn').addEventListener('click', startStreak);
+    $('streak-stop').addEventListener('click', () => endStreak());
     $('rush-stop').addEventListener('click', () => endRush(false));
     $('rush-overlay-close').addEventListener('click', () => {
       $('rush-overlay').hidden = true;
@@ -99,7 +104,7 @@ export function createPuzzles(ui) {
 
   function buildFilters() {
     const wrap = $('puzzle-filters');
-    const chips = [['all', 'All'], ['forme', 'For my rating']].concat(Object.entries(THEMES).map(([k, v]) => [k, v.name]));
+    const chips = [['all', 'All'], ['forme', 'For my rating'], ['review', 'Review misses']].concat(Object.entries(THEMES).map(([k, v]) => [k, v.name]));
     wrap.innerHTML = chips.map(([k, name]) => `<button type="button" class="chip" data-theme="${k}">${name} <span class="chip-count"></span></button>`).join('');
     wrap.addEventListener('click', (e) => {
       const chip = e.target.closest('[data-theme]');
@@ -141,9 +146,22 @@ export function createPuzzles(ui) {
         const mine = PUZZLE_SET.filter((p) => Math.abs(puzzleRating(p) - stats.puzzleRating) <= 220);
         c = { n: mine.length, s: mine.filter((p) => stats.puzzles[p.id]).length };
       }
+      if (k === 'review') {
+        const missed = PUZZLE_SET.filter((p) => stats.puzzleAttempts[p.id] === 'loss' && !stats.puzzles[p.id]);
+        c = { n: missed.length, s: 0 };
+      }
       chip.querySelector('.chip-count').textContent = `${c.s}/${c.n}`;
       chip.hidden = c.n === 0;
     });
+    const ds = dailyStreak(stats);
+    $('daily-streak').textContent = ds ? `Daily streak ${ds}` : 'No daily streak yet';
+    const strip = [];
+    for (let k = 6; k >= 0; k--) {
+      const key = dayKey(Date.now() - k * 86400000);
+      strip.push(`<i class="${stats.daily && stats.daily[key] ? 'done' : ''}" title="${key}"></i>`);
+    }
+    $('daily-strip').innerHTML = strip.join('');
+    $('puzzle-streak-best').textContent = stats.streakBest ? `Streak best: ${stats.streakBest}` : '';
     const prov = stats.puzzleRated < PROVISIONAL_PUZZLES ? '?' : '';
     $('puzzle-rating').textContent = `Puzzle rating ${stats.puzzleRating}${prov}`;
     $('puzzle-rating').title = prov ? `Provisional until ${PROVISIONAL_PUZZLES} rated attempts (${stats.puzzleRated} so far). Peak ${stats.puzzlePeak}.` : `Peak ${stats.puzzlePeak}.`;
@@ -246,7 +264,7 @@ export function createPuzzles(ui) {
       P.solved = true;
       sound.play('win');
       let ratingText = '';
-      if (!P.failed && !P.assisted && !rush) {
+      if (!P.failed && !P.assisted && !rush && !streak) {
         const r = recordPuzzleAttempt(stats, p, true);
         if (r.first) ratingText = ` Rating ${r.delta >= 0 ? '+' : ''}${r.delta} (${r.rating}).`;
         (r.earned || []).forEach((b) => ui.badge(b));
@@ -256,9 +274,11 @@ export function createPuzzles(ui) {
       const first = !stats.puzzles[p.id];
       const earned = recordPuzzle(stats, p.id, PUZZLE_SET.length);
       earned.forEach((b) => ui.badge(b));
+      if (index === dailyIndex()) recordDaily(stats).forEach((b) => ui.badge(b));
       if (first) confetti(undefined, 60);
       syncFilters();
       buildGrid();
+      if (streak) streakSolved();
       $('puzzle-prating').textContent = `Rated ${puzzleRating(p)} · solved`;
       if (rush) rushSolved();
     } else {
@@ -266,7 +286,7 @@ export function createPuzzles(ui) {
       sound.play('error');
       const why = p.refute && p.refute[text] ? p.refute[text] : 'That does not work here.';
       let ratingText = '';
-      if (!P.failed && !P.assisted && !rush) {
+      if (!P.failed && !P.assisted && !rush && !streak) {
         const r = recordPuzzleAttempt(stats, p, false);
         if (r.first) ratingText = ` Rating ${r.delta} (${r.rating}).`;
         syncFilters();
@@ -274,6 +294,7 @@ export function createPuzzles(ui) {
       P.failed = true;
       setFeedback(`${text}? ${why}${ratingText}`, 'bad');
       if (rush) rushMissed();
+      if (streak) streakMissed();
       setTimeout(() => {
         P.game = before;
         P.busy = false;
@@ -294,7 +315,7 @@ export function createPuzzles(ui) {
 
   function showSolution() {
     const p = current();
-    if (!P.solved && !P.failed && !P.assisted && !rush) {
+    if (!P.solved && !P.failed && !P.assisted && !rush && !streak) {
       const r = recordPuzzleAttempt(stats, p, false);
       if (r.first) ui.toast(`Solution viewed: rating ${r.delta} (${r.rating}).`);
       syncFilters();
@@ -314,6 +335,7 @@ export function createPuzzles(ui) {
     setFeedback(`${p.solutions[0]}. ${p.explain}${others}`, 'good');
     $('puzzle-line').textContent = p.line && p.line.split(' ').length > 1 ? `Engine line: ${p.line}` : '';
     if (rush) rushMissed();
+    if (streak) streakMissed();
   }
 
   function nextUnsolved() {
@@ -338,6 +360,7 @@ export function createPuzzles(ui) {
   // Rush ------------------------------------------------------------------
 
   function startRush() {
+    if (streak) { streak = null; $('streak-bar').hidden = true; }
     const order = PUZZLE_SET.map((p, i) => i).sort(() => Math.random() - 0.5);
     rush = { order, pos: 0, score: 0, strikes: 0, endsAt: Date.now() + 180000, timer: null };
     $('rush-bar').hidden = false;
@@ -406,6 +429,56 @@ export function createPuzzles(ui) {
     $('rush-overlay').hidden = false;
     if (record && score > 0) confetti();
     sound.play(score > 0 ? 'win' : 'draw');
+  }
+
+  // Streak ------------------------------------------------------------------
+
+  function startStreak() {
+    const order = PUZZLE_SET.map((p, i) => ({ i, r: puzzleRating(p) + Math.random() * 150 })).sort((a, b) => a.r - b.r).map((x) => x.i);
+    streak = { order, pos: 0, count: 0 };
+    $('streak-bar').hidden = false;
+    $('rush-overlay').hidden = true;
+    filter = { theme: 'all', diff: 0 };
+    syncFilters();
+    buildGrid();
+    load(streak.order[0]);
+    renderStreak();
+    ui.toast('Streak: puzzles get harder as you go. One miss ends it.');
+  }
+
+  function renderStreak() {
+    if (!streak) return;
+    $('streak-count').textContent = streak.count;
+  }
+
+  function streakSolved() {
+    streak.count += 1;
+    renderStreak();
+    setTimeout(() => {
+      if (!streak) return;
+      streak.pos += 1;
+      if (streak.pos >= streak.order.length) endStreak();
+      else load(streak.order[streak.pos]);
+    }, 900);
+  }
+
+  function streakMissed() {
+    setTimeout(endStreak, 1000);
+  }
+
+  function endStreak() {
+    if (!streak) return;
+    const count = streak.count;
+    streak = null;
+    $('streak-bar').hidden = true;
+    const record = count > (stats.streakBest || 0);
+    recordStreak(stats, count).forEach((b) => ui.badge(b));
+    syncFilters();
+    $('rush-result').textContent = `Streak of ${count}`;
+    $('rush-result-sub').textContent = record ? 'A new personal best.' : `Your best is ${stats.streakBest}.`;
+    $('rush-overlay').hidden = false;
+    if (record && count > 0) confetti();
+    sound.play(count > 0 ? 'win' : 'draw');
   }
 
   function refreshStats() {

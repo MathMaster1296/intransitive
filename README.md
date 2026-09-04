@@ -31,14 +31,28 @@ captures is a draw.
 - Drag and drop or click to move, an evaluation bar, move ratings (best,
   good, inaccuracy, mistake, blunder), hints with an arrow, a threats
   overlay, a rings overlay, board flipping, and move-by-move review.
+- Play a friend online by link: the browsers connect directly to each other
+  through a public signalling server, with no account and no server of our
+  own. Clocks with increments for games between people, an adaptive computer
+  level pinned to your rating, and four computer personalities (balanced,
+  aggressive, defensive, trader). Watch mode pits two levels against each
+  other.
+- Analysis tools on any position: the engine's top three moves drawn as
+  arrows, a coach that explains material, matchup, runners and threats in
+  plain words, and a game report with accuracy, error counts, a clickable
+  evaluation graph and the turning point of the game.
+- Share links for whole games and for single positions, board colour and
+  piece-style settings, and offline support as an installable web app.
 - A one-minute interactive tutorial, a home page demo game, rules and
   strategy pages with diagrams, and strategy tips on the play page.
 - A large puzzle set mined from the engine: positions with exactly one
   winning or saving move, grouped by theme (races, blocks, stopping a
   runner, forks, traps, and more) and rated by difficulty. Wrong answers
   get a specific refutation, solved puzzles show the engine's line, and
-  there is a daily puzzle, a three-minute puzzle rush, and a button to play
-  any position out against the computer. `node tools/verify.mjs` re-checks
+  there is a daily puzzle with a streak calendar, a three-minute puzzle
+  rush, a streak mode where puzzles get harder until you miss, a review set
+  of the puzzles you failed, and a button to play any position out against
+  the computer. `node tools/verify.mjs` re-checks
   every shipped puzzle.
 - Ratings, all stored only in your browser: a provisional Elo against the
   computer levels (with history and peak), a separate puzzle rating where
@@ -85,6 +99,10 @@ js/puzzles.js      the puzzles page
 js/tutorial.js     the guided tutorial
 js/home.js         the demo game on the home page
 js/lessons.js      diagram positions, guide data, tutorial steps, tips
+js/coach.js        plain-language position explanations
+js/review.js       game report and evaluation graph
+js/online.js       peer-to-peer online play
+js/settings.js     board and piece appearance
 js/puzzledata.js   the puzzle set (generated)
 js/strategy.js     the strategy guide
 js/stats.js        rating, record and badges

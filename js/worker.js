@@ -1,8 +1,9 @@
-import { search, LEVELS } from './ai.js';
+import { search, rankMoves, LEVELS } from './ai.js';
 
 self.onmessage = (e) => {
-  const { id, board, player, sinceCapture, level, opts } = e.data;
+  const { id, board, player, sinceCapture, level, opts, op } = e.data;
   const options = opts || LEVELS[level] || LEVELS.medium;
-  const result = search(new Uint8Array(board), player, sinceCapture, options);
+  const b = new Uint8Array(board);
+  const result = op === 'rank' ? rankMoves(b, player, sinceCapture, options) : search(b, player, sinceCapture, options);
   self.postMessage({ id, result });
 };

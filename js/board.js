@@ -17,8 +17,10 @@ export function pieceSvg(type) {
   return `<svg viewBox="0 0 24 24" aria-hidden="true">${GLYPHS[TYPE_NAMES[type]]}</svg>`;
 }
 
+const LETTERS = ['R', 'P', 'S'];
+
 export function pieceHtml(v, extra = '') {
-  return `<div class="piece ${PLAYER_NAMES[ownerOf(v)]} ${TYPE_NAMES[typeOf(v)]} ${extra}">${pieceSvg(typeOf(v))}</div>`;
+  return `<div class="piece ${PLAYER_NAMES[ownerOf(v)]} ${TYPE_NAMES[typeOf(v)]} ${extra}" data-letter="${LETTERS[typeOf(v)]}">${pieceSvg(typeOf(v))}</div>`;
 }
 
 const DYNAMIC = ['selected', 'target', 'capture', 'last', 'ring-odd', 'attacked', 'threat',

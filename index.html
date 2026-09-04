@@ -42,6 +42,9 @@
     <symbol id="i-prev" viewBox="0 0 24 24"><path d="M16 5l-9 7 9 7z"/></symbol>
     <symbol id="i-next" viewBox="0 0 24 24"><path d="M8 5l9 7-9 7z"/></symbol>
     <symbol id="i-last" viewBox="0 0 24 24"><path d="M18 5v14M6 5l9 7-9 7z"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 20h18M5 16l4-5 4 3 6-8"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></symbol>
     <symbol id="i-keys" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M11 10h.01M15 10h.01M7 14h10"/></symbol>
   </defs>
 </svg>
@@ -59,6 +62,7 @@
     <a href="#about">About</a>
   </nav>
   <div class="top-right">
+    <button class="btn icon ghost" id="settings-btn" title="Settings" aria-label="Settings"><svg><use href="#i-gear"/></svg></button>
     <button class="btn icon ghost" id="keys-btn" title="Keyboard shortcuts" aria-label="Keyboard shortcuts"><svg><use href="#i-keys"/></svg></button>
     <button class="btn icon ghost" id="sound-btn" title="Sound" aria-label="Toggle sound" aria-pressed="true"><svg><use href="#i-sound"/></svg></button>
     <button class="btn icon ghost" id="theme-btn" title="Theme" aria-label="Toggle theme"><svg><use href="#i-sun"/></svg></button>
@@ -132,6 +136,8 @@
     </div>
     <span class="muted small" id="mu-rated"></span>
     <div class="row" style="margin-left:auto">
+      <button class="btn" id="btn-pause" type="button" hidden>Pause</button>
+      <button class="btn" id="btn-draw" type="button" hidden>Offer draw</button>
       <button class="btn primary" id="btn-new" type="button">New game</button>
     </div>
   </div>
@@ -155,11 +161,21 @@
         <div class="status-line"><span class="dot blue" id="status-dot"></span><span id="status-text">Blue to move</span></div>
         <div class="muted small" id="status-sub"></div>
         <div class="players">
-          <div class="player-row" id="prow-blue"><span class="dot blue"></span><span class="name" id="pname-blue">Blue</span><span class="counts-inline" id="pcounts-blue"></span></div>
-          <div class="player-row" id="prow-red"><span class="dot red"></span><span class="name" id="pname-red">Red</span><span class="counts-inline" id="pcounts-red"></span></div>
+          <div class="player-row" id="prow-blue"><span class="dot blue"></span><span class="name" id="pname-blue">Blue</span><span class="counts-inline" id="pcounts-blue"></span><span class="clock" id="clock-blue" hidden></span></div>
+          <div class="player-row" id="prow-red"><span class="dot red"></span><span class="name" id="pname-red">Red</span><span class="counts-inline" id="pcounts-red"></span><span class="clock" id="clock-red" hidden></span></div>
         </div>
         <div class="muted small" id="eval-text" style="margin-top:0.5rem"></div>
+        <div class="top-list" id="top-list" hidden></div>
         <div class="notice" id="status-stagnation" hidden></div>
+      </div>
+      <div class="card" id="online-card" hidden>
+        <h2>Online</h2>
+        <div class="small" id="online-status">Not connected.</div>
+        <div class="row" style="margin-top:0.5rem">
+          <input class="link-input" id="online-link" readonly hidden>
+          <button class="btn small" id="online-copy" type="button" hidden>Copy link</button>
+          <button class="btn small" id="online-leave" type="button">Leave</button>
+        </div>
       </div>
       <div class="card">
         <h2>Actions</h2>
@@ -172,7 +188,19 @@
           <button class="btn" id="btn-rings" type="button" aria-pressed="false" title="Show rings from a corner (R)"><svg><use href="#i-rings"/></svg>Rings</button>
           <button class="btn" id="btn-share" type="button" title="Copy a link to this game"><svg><use href="#i-share"/></svg>Share</button>
           <button class="btn" id="btn-moves" type="button" title="Copy or paste a move list"><svg><use href="#i-list"/></svg>Moves</button>
+          <button class="btn" id="btn-top" type="button" title="Engine's top three moves (B)"><svg><use href="#i-star"/></svg>Top moves</button>
+          <button class="btn" id="btn-coach" type="button" title="Explain this position (C)"><svg><use href="#i-chat"/></svg>Coach</button>
+          <button class="btn" id="btn-report" type="button" title="Game report and evaluation graph"><svg><use href="#i-chart"/></svg>Report</button>
         </div>
+      </div>
+      <div class="card" id="coach-card" hidden>
+        <h2>Coach <button class="btn small ghost" id="coach-close" type="button">close</button></h2>
+        <ul class="coach-list" id="coach-text"></ul>
+      </div>
+      <div class="card" id="report-card" hidden>
+        <h2>Game report <button class="btn small ghost" id="report-close" type="button">close</button></h2>
+        <svg class="eval-graph" id="eval-graph" aria-label="Evaluation over the game"></svg>
+        <div id="report-body" class="report-body"></div>
       </div>
       <div class="card">
         <h2>Move list <span id="move-count" class="muted"></span></h2>
@@ -504,6 +532,7 @@
     </div>
     <div class="row">
       <button id="puzzle-daily-btn" class="btn" type="button"><svg><use href="#i-star"/></svg>Today's puzzle</button>
+      <button id="puzzle-streak-btn" class="btn" type="button">Streak</button>
       <button id="puzzle-rush-btn" class="btn primary" type="button"><svg><use href="#i-play"/></svg>Puzzle rush</button>
     </div>
   </div>
@@ -512,6 +541,14 @@
     <span class="muted small" id="puzzle-progress-text">0 solved</span>
     <span class="rating-pill" id="puzzle-rating">Puzzle rating 1200</span>
     <span class="muted small" id="puzzle-rush-best"></span>
+    <span class="muted small" id="puzzle-streak-best"></span>
+    <span class="daily-wrap"><span class="daily-strip" id="daily-strip"></span><span class="muted small" id="daily-streak"></span></span>
+  </div>
+  <div id="streak-bar" class="card rush-bar" hidden>
+    <span class="rush-label">Streak</span>
+    <span class="rush-score"><strong id="streak-count">0</strong> in a row</span>
+    <span class="muted small">Puzzles get harder. One miss ends it.</span>
+    <button id="streak-stop" class="btn small" type="button" style="margin-left:auto">Stop</button>
   </div>
   <div class="puzzle-filters" id="puzzle-filters"></div>
   <div class="row" style="margin:0.4rem 0 1rem">
@@ -607,6 +644,35 @@
     <div class="seg" id="ng-mode">
       <button type="button" data-mode="cpu" class="active">Computer</button>
       <button type="button" data-mode="two">Two players</button>
+      <button type="button" data-mode="online">Online</button>
+      <button type="button" data-mode="watch">Watch</button>
+    </div>
+  </div>
+  <div class="field" id="ng-online-field" hidden>
+    <span>Play a friend by link</span>
+    <div class="row" style="gap:0.4rem">
+      <label class="name-input" style="flex:1"><span class="dot blue"></span><input id="ng-online-name" maxlength="18" placeholder="Your name" autocomplete="off"></label>
+      <select id="ng-online-color"><option value="0">I play blue</option><option value="1">I play red</option><option value="random" selected>Random colours</option></select>
+    </div>
+    <p class="small muted" style="margin:0.3rem 0 0.5rem">Create a link, send it to your friend, and the game starts when they open it. Moves travel straight between your two browsers.</p>
+    <div class="row">
+      <button class="btn primary" id="ng-create-link" type="button">Create link</button>
+      <span class="small muted" id="ng-online-status"></span>
+    </div>
+    <div class="row" id="ng-link-row" style="margin-top:0.5rem" hidden>
+      <input class="link-input" id="ng-link" readonly>
+      <button class="btn small" id="ng-link-copy" type="button">Copy</button>
+    </div>
+  </div>
+  <div class="field" id="ng-watch-field" hidden>
+    <span>Who plays</span>
+    <div class="row" style="gap:0.5rem">
+      <label class="row" style="gap:0.3rem"><span class="dot blue"></span>
+        <select id="ng-watch-blue"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select>
+      </label>
+      <label class="row" style="gap:0.3rem"><span class="dot red"></span>
+        <select id="ng-watch-red"><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard" selected>Hard</option></select>
+      </label>
     </div>
   </div>
   <div class="field" id="ng-color-field">
@@ -633,7 +699,27 @@
       <button type="button" class="choice" data-level="easy"><strong>Easy</strong><span data-desc="Looks two moves ahead and slips up">Looks two moves ahead and slips up</span></button>
       <button type="button" class="choice active" data-level="medium"><strong>Medium</strong><span data-desc="Four moves ahead, solid tactics">Four moves ahead, solid tactics</span></button>
       <button type="button" class="choice" data-level="hard"><strong>Hard</strong><span data-desc="Deep search, patient and mean">Deep search, patient and mean</span></button>
+      <button type="button" class="choice" data-level="adaptive"><strong>Adaptive</strong><span data-desc="Tracks your rating and grows with you">Tracks your rating and grows with you</span></button>
     </div>
+  </div>
+  <div class="field" id="ng-style-field">
+    <span>Personality</span>
+    <div class="seg" id="ng-style">
+      <button type="button" data-style="balanced" class="active">Balanced</button>
+      <button type="button" data-style="aggressive">Aggressive</button>
+      <button type="button" data-style="defensive">Defensive</button>
+      <button type="button" data-style="trader">Trader</button>
+    </div>
+  </div>
+  <div class="field" id="ng-clock-field" hidden>
+    <span>Clock</span>
+    <select id="ng-clock">
+      <option value="none">No clock</option>
+      <option value="3+2">3 minutes + 2 seconds</option>
+      <option value="5+5">5 minutes + 5 seconds</option>
+      <option value="10+0">10 minutes</option>
+      <option value="15+10">15 minutes + 10 seconds</option>
+    </select>
   </div>
   <div class="dialog-actions">
     <button class="btn" type="button" id="ng-cancel">Cancel</button>
@@ -647,9 +733,46 @@
   <textarea id="moves-text" spellcheck="false"></textarea>
   <div class="error" id="moves-error"></div>
   <div class="dialog-actions">
+    <button class="btn" type="button" id="moves-poslink">Copy position link</button>
     <button class="btn" type="button" id="moves-copy">Copy</button>
     <button class="btn" type="button" id="moves-load">Load</button>
     <button class="btn primary" type="button" id="moves-close">Close</button>
+  </div>
+</dialog>
+
+<dialog id="dlg-join">
+  <h2>Join a game</h2>
+  <p class="small muted">Someone sent you a link to play. Enter a name and connect.</p>
+  <label class="name-input"><span class="dot red"></span><input id="join-name" maxlength="18" placeholder="Your name" autocomplete="off"></label>
+  <div class="error" id="join-status" style="margin-top:0.5rem"></div>
+  <div class="dialog-actions">
+    <button class="btn" type="button" id="join-cancel">Cancel</button>
+    <button class="btn primary" type="button" id="join-go">Connect</button>
+  </div>
+</dialog>
+
+<dialog id="dlg-settings">
+  <h2>Settings</h2>
+  <div class="field">
+    <span>Board</span>
+    <div class="row" id="set-board"></div>
+  </div>
+  <div class="field">
+    <span>Pieces</span>
+    <div class="seg" id="set-pieces">
+      <button type="button" data-pieces="icons" class="active">Icons</button>
+      <button type="button" data-pieces="letters">Letters</button>
+    </div>
+  </div>
+  <div class="field">
+    <span>Motion</span>
+    <div class="seg" id="set-motion">
+      <button type="button" data-motion="on" class="active">Animations on</button>
+      <button type="button" data-motion="off">Animations off</button>
+    </div>
+  </div>
+  <div class="dialog-actions">
+    <button class="btn primary" type="button" id="settings-close">Done</button>
   </div>
 </dialog>
 
@@ -681,6 +804,9 @@
     <kbd>&larr; &rarr;</kbd><span>Step through the game</span>
     <kbd>Home / End</kbd><span>First position / back to live</span>
     <kbd>Esc</kbd><span>Deselect</span>
+    <kbd>B</kbd><span>Top moves</span>
+    <kbd>C</kbd><span>Coach</span>
+    <kbd>P</kbd><span>Pause (watch mode)</span>
     <kbd>M</kbd><span>Mute or unmute</span>
   </div>
   <div class="dialog-actions">

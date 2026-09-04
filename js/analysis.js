@@ -45,7 +45,9 @@ function createChannel() {
     if (!aiModule) aiModule = await import('./ai.js');
     await new Promise((r) => setTimeout(r, 20));
     const opts = request.opts || aiModule.LEVELS[request.level] || aiModule.LEVELS.medium;
-    return aiModule.search(new Uint8Array(request.board), request.player, request.sinceCapture, opts);
+    const b = new Uint8Array(request.board);
+    if (request.op === 'rank') return aiModule.rankMoves(b, request.player, request.sinceCapture, opts);
+    return aiModule.search(b, request.player, request.sinceCapture, opts);
   }
 
   return function run(request) {
@@ -63,9 +65,14 @@ const moveChannel = createChannel();
 const analysisChannel = createChannel();
 
 export const engine = {
-  // Move for the computer opponent at a named level.
+  // Move for the computer opponent. `level` is a name or an options object.
   bestMove(board, player, sinceCapture, level) {
+    if (typeof level === 'object') return moveChannel({ board, player, sinceCapture, opts: level });
     return moveChannel({ board, player, sinceCapture, level });
+  },
+  // Every legal move scored, best first.
+  rank(board, player, sinceCapture, opts = { maxDepth: 3, timeMs: 110, top: 5 }) {
+    return analysisChannel({ board, player, sinceCapture, opts, op: 'rank' });
   },
   // Quick evaluation. Resolves with the search result: score is from the
   // side to move's point of view.

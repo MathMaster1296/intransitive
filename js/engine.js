@@ -393,6 +393,10 @@ export function describeResult(result) {
       return 'Draw by stagnation: 100 moves with no captures.';
     case 'resign':
       return `${cap} wins by resignation.`;
+    case 'timeout':
+      return `${cap} wins on time.`;
+    case 'abandon':
+      return `${cap} wins. The other player left the game.`;
     default:
       return 'Game over.';
   }
@@ -442,4 +446,30 @@ export function decodeMoves(text) {
     game = play(game, packMove(from, to));
   }
   return game;
+}
+
+// Position links: the whole board packed as a base-36 string plus the side
+// to move. Cells are digits 0 to 6, read as one base-7 number.
+export function encodePosition(board, turn) {
+  let n = 0n;
+  for (let i = 0; i < CELLS; i++) n = n * 7n + BigInt(board[i]);
+  return (turn === RED ? 'r' : 'b') + n.toString(36);
+}
+
+export function decodePosition(text) {
+  const s = String(text || '');
+  if (!/^[br][0-9a-z]+$/.test(s)) throw new Error('That is not a position link.');
+  const turn = s[0] === 'r' ? RED : BLUE;
+  let n = 0n;
+  for (const ch of s.slice(1)) n = n * 36n + BigInt(parseInt(ch, 36));
+  const board = new Uint8Array(CELLS);
+  for (let i = CELLS - 1; i >= 0; i--) {
+    board[i] = Number(n % 7n);
+    n /= 7n;
+  }
+  if (n !== 0n) throw new Error('That is not a position link.');
+  if ((board[HOME[0]] && ownerOf(board[HOME[0]]) !== BLUE) || (board[HOME[1]] && ownerOf(board[HOME[1]]) !== RED)) {
+    throw new Error('That position has already been won.');
+  }
+  return { board, turn };
 }

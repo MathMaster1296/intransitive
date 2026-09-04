@@ -19,6 +19,9 @@ export const BADGES = [
   { id: 'rating-1500', name: 'Expert', desc: 'Reach a game rating of 1500.' },
   { id: 'puzzle-1500', name: 'Sharp eyes', desc: 'Reach a puzzle rating of 1500.' },
   { id: 'rush-10', name: 'Rush hour', desc: 'Solve ten puzzles in one puzzle rush.' },
+  { id: 'streak-10', name: 'Unbroken', desc: 'Solve ten puzzles in a row in streak mode.' },
+  { id: 'daily-7', name: 'Daily habit', desc: 'Solve the daily puzzle seven days running.' },
+  { id: 'online-win', name: 'Long distance', desc: 'Win a game against someone online.' },
 ];
 
 function blank() {
@@ -29,7 +32,57 @@ function blank() {
     puzzleRating: 1200, puzzleRated: 0, puzzlePeak: 1200, puzzleAttempts: {}, puzzleHistory: [],
     badges: {}, puzzles: {}, tutorialDone: false, history: [],
     players: {}, lastNames: { blue: '', red: '' },
+    daily: {}, streakBest: 0,
   };
+}
+
+export function dayKey(t = Date.now()) {
+  const d = new Date(t);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// Consecutive days, ending today or yesterday, on which the daily puzzle
+// was solved.
+export function dailyStreak(stats) {
+  const days = stats.daily || {};
+  let n = 0;
+  let t = Date.now();
+  if (!days[dayKey(t)]) t -= 86400000;
+  while (days[dayKey(t)]) {
+    n += 1;
+    t -= 86400000;
+  }
+  return n;
+}
+
+export function recordDaily(stats) {
+  if (!stats.daily) stats.daily = {};
+  const earned = [];
+  stats.daily[dayKey()] = true;
+  if (dailyStreak(stats) >= 7 && !stats.badges['daily-7']) {
+    stats.badges['daily-7'] = Date.now();
+    earned.push(BADGES.find((b) => b.id === 'daily-7'));
+  }
+  saveStats(stats);
+  return earned;
+}
+
+export function recordStreak(stats, count) {
+  const earned = [];
+  stats.streakBest = Math.max(stats.streakBest || 0, count);
+  if (count >= 10 && !stats.badges['streak-10']) {
+    stats.badges['streak-10'] = Date.now();
+    earned.push(BADGES.find((b) => b.id === 'streak-10'));
+  }
+  saveStats(stats);
+  return earned;
+}
+
+export function grantBadge(stats, id) {
+  if (stats.badges[id]) return [];
+  stats.badges[id] = Date.now();
+  saveStats(stats);
+  return [BADGES.find((b) => b.id === id)];
 }
 
 // Player profiles for games between people on the same device.
@@ -149,7 +202,7 @@ export function recordRush(stats, score) {
 // 'draw' from the human's point of view. Returns the new badges and the
 // rating change.
 export function recordGame(stats, {
-  level, outcome, moves, rated, piecesLost, maxDeficit, opponentScissorsOut,
+  level, outcome, moves, rated, piecesLost, maxDeficit, opponentScissorsOut, opponentRating = null,
 }) {
   stats.games += 1;
   const lv = stats.byLevel[level] || (stats.byLevel[level] = { w: 0, l: 0, d: 0 });
@@ -171,7 +224,7 @@ export function recordGame(stats, {
   if (rated) {
     const score = outcome === 'win' ? 1 : outcome === 'loss' ? 0 : 0.5;
     const k = stats.ratedGames < 10 ? 40 : 24;
-    delta = Math.round(k * (score - expected(stats.rating, LEVEL_RATING[level] || 1200)));
+    delta = Math.round(k * (score - expected(stats.rating, opponentRating || LEVEL_RATING[level] || 1200)));
     stats.rating = Math.max(100, stats.rating + delta);
     stats.ratedGames += 1;
     stats.peak = Math.max(stats.peak || 0, stats.rating);

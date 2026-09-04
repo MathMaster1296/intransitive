@@ -1,7 +1,7 @@
 // Offline support: cache the app shell on install, serve from cache first,
 // and refresh the cache in the background.
 
-const CACHE = 'intransitive-v4';
+const CACHE = 'intransitive-v5';
 const SHELL = [
   './',
   './index.html',
@@ -20,6 +20,12 @@ const SHELL = [
   './js/sound.js',
   './js/fx.js',
   './js/stats.js',
+  './js/coach.js',
+  './js/review.js',
+  './js/settings.js',
+  './js/online.js',
+  './js/strategy.js',
+  './js/puzzledata.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
