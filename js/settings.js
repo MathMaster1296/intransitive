@@ -9,7 +9,7 @@ export const BOARD_THEMES = {
   ocean: 'Ocean',
 };
 
-let settings = { board: 'walnut', pieces: 'icons', motion: true };
+let settings = { board: 'walnut', pieces: 'icons', motion: true, palette: 'standard' };
 
 export function loadSettings() {
   try {
@@ -41,4 +41,5 @@ function apply() {
   root.dataset.board = BOARD_THEMES[settings.board] ? settings.board : 'walnut';
   root.dataset.pieces = settings.pieces === 'letters' ? 'letters' : 'icons';
   root.dataset.motion = settings.motion ? 'on' : 'off';
+  root.dataset.palette = settings.palette === 'friendly' ? 'friendly' : 'standard';
 }

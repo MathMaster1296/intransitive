@@ -374,7 +374,7 @@ export function createPuzzles(ui) {
       renderRush();
       if (Date.now() >= rush.endsAt) endRush(true);
     }, 250);
-    ui.toast('Puzzle rush: three minutes, three strikes. Go.');
+    ui.toast('Puzzle rush: you have three minutes and three strikes. Go.');
   }
 
   function renderRush() {

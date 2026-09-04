@@ -49,6 +49,7 @@
   </defs>
 </svg>
 
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="top">
   <a class="wordmark" href="#home">
     <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#ded3bc"/><circle cx="10" cy="22" r="7" fill="#2f6ee8"/><circle cx="22" cy="10" r="7" fill="#e04848"/></svg>
@@ -69,20 +70,20 @@
   </div>
 </header>
 
-<main>
+<main id="main" tabindex="-1">
 
 <section id="view-home" class="view">
   <div class="hero">
     <div>
       <span class="eyebrow">A board game you can learn in a minute</span>
       <h1>Rock, paper, scissors.<br>Now it is a board game.</h1>
-      <p class="lead">Ten pieces each on a nine by nine board. Rock takes scissors, scissors takes paper, paper takes rock, and the first piece to reach the far corner wins.</p>
+      <p class="lead">Each side has ten pieces on a nine by nine board. Rock takes scissors, scissors takes paper, paper takes rock, and the first piece to reach the far corner wins.</p>
       <div class="cta">
         <a class="btn primary big" href="#play"><svg><use href="#i-play"/></svg>Play now</a>
         <button class="btn big" id="home-tutorial" type="button"><svg><use href="#i-bulb"/></svg>Learn in a minute</button>
       </div>
       <div class="hero-meta">
-        <div><strong>3</strong>computer levels</div>
+        <div><strong>4</strong>computer levels</div>
         <div><strong id="home-puzzle-count">6</strong>puzzles</div>
         <div><strong>0</strong>sign-ups needed</div>
       </div>
@@ -97,19 +98,19 @@
     <a class="card feature" href="#play">
       <span class="icon"><svg><use href="#i-play"/></svg></span>
       <h3>Play the computer</h3>
-      <p>Three levels, from a forgiving beginner to a search that looks six moves ahead. Drag pieces, get hints, and review your games move by move.</p>
+      <p>There are four levels and four personalities, from a forgiving beginner to an adaptive opponent that grows with your rating. Drag pieces, get hints, and review your games move by move.</p>
       <span class="go">Start a game</span>
     </a>
     <a class="card feature" href="#strategy">
       <span class="icon"><svg><use href="#i-book"/></svg></span>
       <h3>Learn the strategy</h3>
-      <p>Material, position and matchup, plus the ring rule that decides every race for the corner. All of it laid out with diagrams you can check against the board.</p>
+      <p>The guide covers material, position and matchup, plus the ring rule that decides every race for the corner, with boards you can play with in every chapter.</p>
       <span class="go">Read the notes</span>
     </a>
     <a class="card feature" href="#puzzles">
       <span class="icon"><svg><use href="#i-puzzle"/></svg></span>
       <h3>Solve the daily puzzle</h3>
-      <p>Short positions with one decisive idea each, checked by the engine. A new one is featured every day, and you can play any of them out against the computer.</p>
+      <p>Every puzzle has one decisive idea, and the engine checked each of them. A new one is featured every day, and you can play any of them out against the computer.</p>
       <span class="go">Try today's</span>
     </a>
   </div>
@@ -158,7 +159,7 @@
     </div>
     <aside class="panel">
       <div class="card">
-        <div class="status-line"><span class="dot blue" id="status-dot"></span><span id="status-text">Blue to move</span></div>
+        <div class="status-line" aria-live="polite"><span class="dot blue" id="status-dot"></span><span id="status-text">Blue to move</span></div>
         <div class="muted small" id="status-sub"></div>
         <div class="players">
           <div class="player-row" id="prow-blue"><span class="dot blue"></span><span class="name" id="pname-blue">Blue</span><span class="counts-inline" id="pcounts-blue"></span><span class="clock" id="clock-blue" hidden></span></div>
@@ -172,7 +173,7 @@
         <h2>Online</h2>
         <div class="small" id="online-status">Not connected.</div>
         <div class="row" style="margin-top:0.5rem">
-          <input class="link-input" id="online-link" readonly hidden>
+          <input class="link-input" id="online-link" aria-label="Invite link" readonly hidden>
           <button class="btn small" id="online-copy" type="button" hidden>Copy link</button>
           <button class="btn small" id="online-leave" type="button">Leave</button>
         </div>
@@ -211,7 +212,7 @@
           <button class="btn small" id="rv-next" type="button" title="Next (Right)"><svg><use href="#i-next"/></svg></button>
           <button class="btn small" id="rv-last" type="button" title="Live (End)"><svg><use href="#i-last"/></svg></button>
         </div>
-        <div class="review-status" id="rv-status"></div>
+        <div class="review-status" id="rv-status" aria-live="polite"></div>
       </div>
       <div class="card">
         <h2>You <button class="btn small ghost" id="btn-reset-stats" type="button">reset</button></h2>
@@ -315,7 +316,7 @@
         <h2>The cheat sheet</h2>
         <p class="prose">Six habits that decide most games. Each one gets a chapter of its own below, with positions you can play through.</p>
         <div class="cheat">
-          <div class="card"><strong>Count pieces by type</strong><p>Not just how many, but how many of each. One scissors against three papers is losing.</p></div>
+          <div class="card"><strong>Count pieces by type</strong><p>Count each type separately, because the total hides the story. One scissors against three papers is losing.</p></div>
           <div class="card"><strong>Count rings</strong><p>Every runner is a countdown. Your blocker has to stay a ring ahead of it.</p></div>
           <div class="card"><strong>Block with the right type</strong><p>A corner blocker must be a piece the runner cannot capture: the same type, or the type that beats it.</p></div>
           <div class="card"><strong>Capture when you can</strong><p>Taking the runner ends the threat. Blocking only postpones it.</p></div>
@@ -528,7 +529,7 @@
   <div class="section-head" style="margin-top:0">
     <div>
       <h1 style="margin-bottom:0.2rem">Puzzles</h1>
-      <p class="lead" style="margin:0">Positions with exactly one right move, every one checked by the engine. Wrong answers get told why. Click a piece then a square, or drag.</p>
+      <p class="lead" style="margin:0">Every puzzle has exactly one right move, and the engine checked all of them. Wrong answers get told why. Click a piece then a square, or drag.</p>
     </div>
     <div class="row">
       <button id="puzzle-daily-btn" class="btn" type="button"><svg><use href="#i-star"/></svg>Today's puzzle</button>
@@ -619,8 +620,8 @@
   <div class="prose">
     <h2>About this site</h2>
     <p>The site is plain HTML, CSS and JavaScript with no build step, and it runs entirely in your browser. The rules engine follows the game's rules exactly, including the no-stalemate rule and the draw after 100 moves without a capture. It works offline once it has loaded, and you can install it to your home screen.</p>
-    <p>The computer opponent is an alpha-beta search that runs in a background thread. Its evaluation is a direct translation of the strategy notes: it counts material, penalises lopsided distributions, rewards pieces that are closer to the enemy corner, and checks whether any runner can still be stopped using the ring rule. Easy looks two moves ahead and makes deliberate mistakes, medium looks four moves ahead, and hard searches as deep as it can in about two seconds. The same search drives the evaluation bar, the hints, the move ratings and the puzzle checks.</p>
-    <p>Your games, stats and badges are stored in your browser only. Nothing is sent anywhere. Source code is on <a href="https://github.com/MathMaster1296/intransitive">GitHub</a> under the MIT licence. If you find a rules mistake, open an issue.</p>
+    <p>The computer opponent is an alpha-beta search that runs in a background thread. Its evaluation is a direct translation of the strategy notes: it counts material, penalises lopsided distributions, rewards pieces that are closer to the enemy corner, and checks whether any runner can still be stopped using the ring rule. Easy looks two moves ahead and makes deliberate mistakes, medium looks four moves ahead, hard searches as deep as it can in about two seconds, and the adaptive level picks a strength to match your rating. The four personalities weight the same evaluation differently. The same search drives the evaluation bar, the hints, the top-moves overlay, the move ratings, the game report and the puzzle checks.</p>
+    <p>Your games, ratings and badges are stored in your browser only. Online games send your name and your moves to your opponent's browser and nothing else, and there is no account to create. Source code is on <a href="https://github.com/MathMaster1296/intransitive">GitHub</a> under the MIT licence. If you find a rules mistake, open an issue.</p>
   </div>
 </section>
 
@@ -651,8 +652,8 @@
   <div class="field" id="ng-online-field" hidden>
     <span>Play a friend by link</span>
     <div class="row" style="gap:0.4rem">
-      <label class="name-input" style="flex:1"><span class="dot blue"></span><input id="ng-online-name" maxlength="18" placeholder="Your name" autocomplete="off"></label>
-      <select id="ng-online-color"><option value="0">I play blue</option><option value="1">I play red</option><option value="random" selected>Random colours</option></select>
+      <label class="name-input" style="flex:1"><span class="dot blue"></span><input id="ng-online-name" maxlength="18" placeholder="Your name" aria-label="Your name" autocomplete="off"></label>
+      <select id="ng-online-color" aria-label="Your colour"><option value="0">I play blue</option><option value="1">I play red</option><option value="random" selected>Random colours</option></select>
     </div>
     <p class="small muted" style="margin:0.3rem 0 0.5rem">Create a link, send it to your friend, and the game starts when they open it. Moves travel straight between your two browsers.</p>
     <div class="row">
@@ -660,7 +661,7 @@
       <span class="small muted" id="ng-online-status"></span>
     </div>
     <div class="row" id="ng-link-row" style="margin-top:0.5rem" hidden>
-      <input class="link-input" id="ng-link" readonly>
+      <input class="link-input" id="ng-link" aria-label="Invite link" readonly>
       <button class="btn small" id="ng-link-copy" type="button">Copy</button>
     </div>
   </div>
@@ -668,10 +669,10 @@
     <span>Who plays</span>
     <div class="row" style="gap:0.5rem">
       <label class="row" style="gap:0.3rem"><span class="dot blue"></span>
-        <select id="ng-watch-blue"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select>
+        <select id="ng-watch-blue" aria-label="Level for blue"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select>
       </label>
       <label class="row" style="gap:0.3rem"><span class="dot red"></span>
-        <select id="ng-watch-red"><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard" selected>Hard</option></select>
+        <select id="ng-watch-red" aria-label="Level for red"><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard" selected>Hard</option></select>
       </label>
     </div>
   </div>
@@ -686,9 +687,9 @@
   <div class="field" id="ng-names-field" hidden>
     <span>Players</span>
     <div class="row" style="gap:0.4rem">
-      <label class="name-input"><span class="dot blue"></span><input id="ng-name-blue" list="ng-names-list" maxlength="18" placeholder="Blue's name" autocomplete="off"></label>
+      <label class="name-input"><span class="dot blue"></span><input id="ng-name-blue" list="ng-names-list" maxlength="18" placeholder="Blue's name" aria-label="Blue's name" autocomplete="off"></label>
       <button class="btn small ghost" id="ng-swap" type="button" title="Swap colours">&#8646;</button>
-      <label class="name-input"><span class="dot red"></span><input id="ng-name-red" list="ng-names-list" maxlength="18" placeholder="Red's name" autocomplete="off"></label>
+      <label class="name-input"><span class="dot red"></span><input id="ng-name-red" list="ng-names-list" maxlength="18" placeholder="Red's name" aria-label="Red's name" autocomplete="off"></label>
       <datalist id="ng-names-list"></datalist>
     </div>
     <p class="small muted" style="margin:0.3rem 0 0">Names are remembered on this device and each one gets its own rating. Leave them blank for a casual game.</p>
@@ -713,7 +714,7 @@
   </div>
   <div class="field" id="ng-clock-field" hidden>
     <span>Clock</span>
-    <select id="ng-clock">
+    <select id="ng-clock" aria-label="Clock">
       <option value="none">No clock</option>
       <option value="3+2">3 minutes + 2 seconds</option>
       <option value="5+5">5 minutes + 5 seconds</option>
@@ -730,7 +731,7 @@
 <dialog id="dlg-moves">
   <h2>Moves</h2>
   <p class="small muted">Copy the move list to save the game, or paste a list and load it to replay a game from the start.</p>
-  <textarea id="moves-text" spellcheck="false"></textarea>
+  <textarea id="moves-text" spellcheck="false" aria-label="Move list"></textarea>
   <div class="error" id="moves-error"></div>
   <div class="dialog-actions">
     <button class="btn" type="button" id="moves-poslink">Copy position link</button>
@@ -743,7 +744,7 @@
 <dialog id="dlg-join">
   <h2>Join a game</h2>
   <p class="small muted">Someone sent you a link to play. Enter a name and connect.</p>
-  <label class="name-input"><span class="dot red"></span><input id="join-name" maxlength="18" placeholder="Your name" autocomplete="off"></label>
+  <label class="name-input"><span class="dot red"></span><input id="join-name" maxlength="18" placeholder="Your name" aria-label="Your name" autocomplete="off"></label>
   <div class="error" id="join-status" style="margin-top:0.5rem"></div>
   <div class="dialog-actions">
     <button class="btn" type="button" id="join-cancel">Cancel</button>
@@ -753,6 +754,13 @@
 
 <dialog id="dlg-settings">
   <h2>Settings</h2>
+  <div class="field">
+    <span>Piece colours</span>
+    <div class="seg" id="set-palette">
+      <button type="button" data-palette="standard" class="active">Blue and red</button>
+      <button type="button" data-palette="friendly">Blue and orange, colourblind-friendly</button>
+    </div>
+  </div>
   <div class="field">
     <span>Board</span>
     <div class="row" id="set-board"></div>

@@ -46,7 +46,7 @@ export function createBoard(root, options = {}) {
     <div class="eval-bar" hidden><div class="fill"></div><div class="mid"></div></div>
     <div class="ranks" aria-hidden="true"></div>
     <div class="board-area">
-      <div class="board ${interactive ? '' : 'diagram'}" role="grid" aria-label="Board"></div>
+      <div class="board ${interactive ? '' : 'diagram'}" role="group" aria-label="${interactive ? 'Board. Nine by nine squares. Use the arrow keys to move between squares and Enter to select or move a piece.' : 'Board diagram'}"></div>
       <svg class="arrows" viewBox="0 0 9 9" aria-hidden="true"></svg>
       <div class="drag-layer"></div>
     </div>
@@ -143,6 +143,8 @@ export function createBoard(root, options = {}) {
         if (old) old.remove();
         if (v) cell.insertAdjacentHTML('beforeend', pieceHtml(v));
         values[i] = v;
+        const name = FILES[col(i)] + (row(i) + 1);
+        cell.setAttribute('aria-label', v ? `${name}, ${PLAYER_NAMES[ownerOf(v)]} ${TYPE_NAMES[typeOf(v)]}` : name);
       }
       if (i === selected) cell.classList.add('selected');
       if (targetSet.has(i)) cell.classList.add(v ? 'capture' : 'target');

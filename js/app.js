@@ -111,7 +111,14 @@ function initSettings() {
     wrap.querySelectorAll('.theme-chip').forEach((c) => c.classList.toggle('active', c.dataset.board === s.board));
     $('set-pieces').querySelectorAll('button').forEach((b) => b.classList.toggle('active', b.dataset.pieces === s.pieces));
     $('set-motion').querySelectorAll('button').forEach((b) => b.classList.toggle('active', b.dataset.motion === (s.motion ? 'on' : 'off')));
+    $('set-palette').querySelectorAll('button').forEach((b) => b.classList.toggle('active', b.dataset.palette === (s.palette || 'standard')));
   }
+  $('set-palette').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-palette]');
+    if (!b) return;
+    updateSettings({ palette: b.dataset.palette });
+    sync();
+  });
   wrap.addEventListener('click', (e) => {
     const c = e.target.closest('[data-board]');
     if (!c) return;

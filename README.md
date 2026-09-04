@@ -23,7 +23,7 @@ captures is a draw.
 - A rules engine that follows the game's rules exactly, including the
   edge cases, with a chess-style move notation so games can be copied and
   pasted.
-- A computer opponent with three levels: an alpha-beta search with a
+- A computer opponent with four levels and four personalities: an alpha-beta search with a
   capture-only quiescence search, running in a Web Worker. The evaluation
   is the game's strategy advice written down: material, matchup (a side with no
   scissors cannot ever capture a paper), distance to the enemy corner, and
@@ -72,8 +72,8 @@ python3 -m http.server 8093
 ```
 
 Then open http://localhost:8093/. The computer opponent uses a module
-worker, so the page needs to be served over http rather than opened as a
-file.
+worker, so the page needs to be served over http; opening the file directly
+will not work.
 
 Tests use the Node test runner:
 

@@ -6,6 +6,7 @@ export function confetti(colors = ['#3a7bff', '#f0524f', '#e0a83a', '#2e8f5b', '
   const canvas = document.getElementById('confetti');
   if (!canvas || running) return;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (document.documentElement.dataset.motion === 'off') return;
   const ctx = canvas.getContext('2d');
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   const w = window.innerWidth;

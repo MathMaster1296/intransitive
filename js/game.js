@@ -395,9 +395,10 @@ export function createGame(ui) {
   function qualityBadge(i) {
     const q = S.quality[i];
     if (!q) return '';
-    const names = { best: 'best', good: 'good', inacc: 'inaccuracy', mistake: 'mistake', blunder: 'blunder' };
-    const title = q.best && q.label !== 'best' ? ` title="Better was ${q.best}"` : '';
-    return `<span class="q ${q.label}"${title}>${names[q.label][0]}</span>`;
+    const names = { best: 'best move', good: 'good move', inacc: 'inaccuracy', mistake: 'mistake', blunder: 'blunder' };
+    const marks = { best: '!', good: 'ok', inacc: '?!', mistake: '?', blunder: '??' };
+    const title = ` title="${names[q.label]}${q.best && q.label !== 'best' ? `, better was ${q.best}` : ''}"`;
+    return `<span class="q ${q.label}"${title} aria-label="${names[q.label]}">${marks[q.label]}</span>`;
   }
 
   function renderMoves() {
