@@ -129,6 +129,7 @@ export function recordTwoPlayerGame(stats, blueName, redName, winner, rated = tr
 
 export function leaderboard(stats, limit = 8) {
   return Object.values(stats.players || {})
+    .filter((p) => p.games > 0)
     .sort((a, b) => b.rating - a.rating || b.games - a.games)
     .slice(0, limit);
 }

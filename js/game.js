@@ -9,7 +9,7 @@ import { sound } from './sound.js';
 import { confetti } from './fx.js';
 import {
   loadStats, saveStats, recordGame, BADGES, LEVEL_RATING, PROVISIONAL_GAMES, expected,
-  getPlayer, recordTwoPlayerGame, leaderboard, grantBadge,
+  recordTwoPlayerGame, leaderboard, grantBadge,
 } from './stats.js';
 import { TIPS } from './lessons.js';
 import { explain } from './coach.js';
@@ -319,8 +319,8 @@ export function createGame(ui) {
     const twoLabel = (player) => {
       const name = playerName(player);
       if (!name) return '';
-      const pl = getPlayer(stats, name);
-      return pl ? ` (${pl.rating})` : '';
+      const pl = stats.players && stats.players[name];
+      return ` (${pl ? pl.rating : 1200})`;
     };
     const label = (player) => {
       if (S.mode === 'cpu') return S.human !== player ? cpuLabel : youLabel;
@@ -978,6 +978,18 @@ export function createGame(ui) {
     $('online-status').textContent = 'Your opponent left.';
   }
 
+  // Leaving an unfinished online game counts as resigning it.
+  function leaveOnline() {
+    const g = S.game;
+    if (S.mode !== 'online') return;
+    if (!g.result) {
+      if (ui.onlineSend) ui.onlineSend({ type: 'resign' });
+      S.game = E.resign(g, S.human);
+      onGameOver();
+    }
+    $('online-status').textContent = 'You left the game.';
+  }
+
   function offerDraw() {
     if (S.mode !== 'online' || S.game.result || !ui.onlineSend) return;
     S.drawOffered = true;
@@ -1236,7 +1248,7 @@ export function createGame(ui) {
 
   return {
     init, startGame, keydown, loadFromLink, loadMovesText, loadPosition, startOnline, remoteMove, remoteResign, remoteLeft,
-    remoteDrawOffer, remoteDrawAccept, movesText: () => E.movesText(S.game), positionLink,
+    remoteDrawOffer, remoteDrawAccept, leaveOnline, movesText: () => E.movesText(S.game), positionLink,
     get state() { return S; },
     get stats() { return stats; },
     refreshStats() { stats = loadStats(); renderStats(); },

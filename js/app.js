@@ -390,8 +390,9 @@ function initOnline() {
     }
   });
   $('online-leave').addEventListener('click', () => {
+    if (game.state.mode === 'online' && !game.state.game.result && !window.confirm('Leaving counts as resigning this game. Leave?')) return;
+    game.leaveOnline();
     online.leave();
-    game.remoteLeft();
     $('online-card').hidden = true;
     toast('Left the online game.');
   });
