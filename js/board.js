@@ -13,6 +13,13 @@ const GLYPHS = {
   scissors: '<circle cx="7.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/><path d="M9.3 15.6 17 4M14.7 15.6 7 4"/>',
 };
 
+// The same glyphs as SVG path strings, for drawing on a canvas.
+export const GLYPH_PATHS = [
+  ['M6 14 8 8 14 5 19 9 18 16 12 19 7 18Z', 'M8 8l5 4 5 4M13 12l-1 7'],
+  ['M7 3h7l4 4v14H7z', 'M14 3v4h4M10 12h5M10 16h5'],
+  ['M9.3 15.6 17 4M14.7 15.6 7 4', 'M5 17.5a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0', 'M14 17.5a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0'],
+];
+
 export function pieceSvg(type) {
   return `<svg viewBox="0 0 24 24" aria-hidden="true">${GLYPHS[TYPE_NAMES[type]]}</svg>`;
 }

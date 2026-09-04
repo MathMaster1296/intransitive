@@ -14,6 +14,8 @@ import { createOnline } from './online.js';
 import { sound } from './sound.js';
 import { loadStats, saveStats, LEVEL_RATING, expected, getPlayer } from './stats.js';
 import { loadSettings, updateSettings, getSettings, BOARD_THEMES } from './settings.js';
+import { createTournament } from './tournament.js';
+import { copyImage, downloadImage, standingsImage } from './image.js';
 
 const THEME_KEY = 'intransitive.theme';
 const VIEWS = ['home', 'play', 'rules', 'strategy', 'puzzles', 'about'];
@@ -405,6 +407,79 @@ function initOnline() {
   });
 }
 
+// Images -----------------------------------------------------------------------
+
+let currentImage = null;
+
+function showImage(canvas, filename) {
+  currentImage = { canvas, filename };
+  const img = $('image-preview');
+  img.src = canvas.toDataURL('image/png');
+  $('image-status').textContent = '';
+  $('dlg-image').showModal();
+}
+
+function initImageDialog() {
+  $('image-close').addEventListener('click', () => $('dlg-image').close());
+  $('image-copy').addEventListener('click', async () => {
+    if (!currentImage) return;
+    const ok = await copyImage(currentImage.canvas);
+    $('image-status').textContent = ok ? 'Copied. Paste it anywhere that takes images.' : 'Copying is not available in this browser. Use Download instead.';
+  });
+  $('image-download').addEventListener('click', () => {
+    if (!currentImage) return;
+    downloadImage(currentImage.canvas, currentImage.filename);
+    $('image-status').textContent = 'Downloading.';
+  });
+  $('moves-image').addEventListener('click', () => {
+    $('dlg-moves').close();
+    game.shareImage();
+  });
+}
+
+// Tournaments -------------------------------------------------------------------
+
+function openTournament() {
+  const t = tournament.state;
+  if (t) {
+    location.hash = '#play';
+    $('tournament-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    toast('A tournament is already running. Use its card on the play page.');
+    return;
+  }
+  const stats = loadStats();
+  const known = Object.keys(stats.players || {});
+  $('tn-names').value = known.slice(0, 4).join('\n');
+  $('tn-error').textContent = '';
+  $('dlg-tournament').showModal();
+}
+
+function initTournament() {
+  $('tn-cancel').addEventListener('click', () => $('dlg-tournament').close());
+  $('tn-start').addEventListener('click', () => {
+    const names = $('tn-names').value.split(/\n|,/).map((n) => n.trim()).filter(Boolean);
+    try {
+      tournament.start(names, $('tn-rounds').value === 'double', $('tn-clock').value);
+      $('dlg-tournament').close();
+    } catch (err) {
+      $('tn-error').textContent = err.message;
+    }
+  });
+  $('tournament-play').addEventListener('click', () => tournament.playNext());
+  $('tournament-end').addEventListener('click', () => {
+    if (!window.confirm('End this tournament? Results stay in the ratings.')) return;
+    tournament.end();
+    toast('Tournament ended.');
+  });
+  $('tournament-image').addEventListener('click', () => {
+    const t = tournament.state;
+    if (!t) return;
+    const rows = tournament.standings;
+    showImage(standingsImage({ title: 'Tournament standings', subtitle: `${t.names.length} players, ${t.double ? 'double' : 'single'} round robin`, rows, footer: `${location.host}${location.pathname}`.replace(/\/$/, '') }), 'intransitive-standings.png');
+  });
+  tournament.render();
+}
+
 // Moves dialog ---------------------------------------------------------------
 
 function initMovesDialog() {
@@ -515,6 +590,11 @@ const ui = {
     location.hash = '#play';
     toast(`Playing this position against the ${level} computer.`);
   },
+  showImage,
+  openTournament,
+  tournamentResult(index, winner) {
+    tournament.recordResult(index, winner);
+  },
   tutorialDone() {
     refreshTutorialBanner();
     if (location.hash !== '#play') location.hash = '#play';
@@ -526,6 +606,7 @@ const game = createGame(ui);
 const puzzles = createPuzzles(ui);
 const tutorial = createTutorial(ui);
 const strategy = createStrategy(ui);
+const tournament = createTournament(ui, game);
 
 initTheme();
 initSound();
@@ -533,6 +614,8 @@ initSettings();
 initNewGameDialog();
 initOnline();
 initMovesDialog();
+initImageDialog();
+initTournament();
 initKeysDialog();
 initDiagrams();
 initKeyboard();

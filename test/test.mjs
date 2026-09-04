@@ -434,3 +434,41 @@ test('rankMoves orders the immediate win first and personalities change scores',
   assert.ok(Object.keys(STYLES).length === 4);
   assert.equal(describeResult({ winner: RED, reason: 'timeout' }), 'Red wins on time.');
 });
+
+import { roundRobin, createSchedule, standings, nextGame } from '../js/tournament.js';
+
+test('round robin schedules pair everyone once with balanced colours', () => {
+  for (const n of [2, 3, 4, 5, 6, 8]) {
+    const rounds = roundRobin(n);
+    const seen = new Set();
+    const asBlue = new Array(n).fill(0);
+    for (const pairs of rounds) {
+      const inRound = new Set();
+      for (const [a, b] of pairs) {
+        assert.ok(!inRound.has(a) && !inRound.has(b), `player twice in a round (${n})`);
+        inRound.add(a);
+        inRound.add(b);
+        const key = [Math.min(a, b), Math.max(a, b)].join('-');
+        assert.ok(!seen.has(key), `pair repeated (${n})`);
+        seen.add(key);
+        asBlue[a] += 1;
+      }
+    }
+    assert.equal(seen.size, (n * (n - 1)) / 2, `all pairs once (${n})`);
+    assert.ok(Math.max(...asBlue) - Math.min(...asBlue) <= 2, `colours roughly balanced (${n})`);
+  }
+  const dbl = roundRobin(4, true);
+  assert.equal(dbl.flat().length, 12);
+});
+
+test('standings score wins and draws and find the next game', () => {
+  const t = createSchedule(['Ann', 'Ben', 'Cy'], false, 'none');
+  assert.equal(t.games.length, 3);
+  assert.equal(nextGame(t), 0);
+  t.games[0].result = t.games[0].blue === 0 ? 0 : 1; // Ann wins game 0 if she plays in it
+  t.games[1].result = null;
+  const rows = standings(t);
+  assert.equal(rows.reduce((a, r) => a + r.points, 0), 2);
+  assert.equal(rows[0].points >= rows[1].points, true);
+  assert.equal(nextGame(t), 2);
+});

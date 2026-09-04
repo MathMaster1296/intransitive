@@ -14,6 +14,8 @@ import {
 import { TIPS } from './lessons.js';
 import { explain } from './coach.js';
 import { buildReport, renderEvalGraph } from './review.js';
+import { boardImage } from './image.js';
+import { getSettings } from './settings.js';
 
 const GAME_KEY = 'intransitive.game.v3';
 const PREF_KEY = 'intransitive.prefs.v1';
@@ -102,6 +104,7 @@ export function createGame(ui) {
     paused: false,
     online: null,
     drawOffered: false,
+    tournament: null,
   };
   let stats = loadStats();
   const prefs = { threats: false, rings: null };
@@ -148,6 +151,7 @@ export function createGame(ui) {
       flip: S.flip,
       overlayDismissed: S.overlayDismissed,
       maxDeficit: S.maxDeficit,
+      tournament: S.tournament,
     };
     storageSet(GAME_KEY, JSON.stringify(data));
   }
@@ -176,6 +180,7 @@ export function createGame(ui) {
       S.flip = !!data.flip;
       S.overlayDismissed = !!data.overlayDismissed;
       S.maxDeficit = data.maxDeficit || 0;
+      S.tournament = Number.isInteger(data.tournament) ? data.tournament : null;
       if (S.mode === 'watch') S.paused = true;
       return true;
     } catch {
@@ -795,10 +800,11 @@ export function createGame(ui) {
 
   function startGame({
     mode = S.mode, level = S.level, style = S.style, human = S.human, board: b = null, turn = E.BLUE,
-    custom = false, names = null, watchLevels = null, clock = null, online = null,
+    custom = false, names = null, watchLevels = null, clock = null, online = null, tournament = null,
   } = {}) {
     cancelThinking();
     S.mode = mode;
+    S.tournament = Number.isInteger(tournament) ? tournament : null;
     S.level = LEVEL_NAMES[level] ? level : 'medium';
     S.style = STYLE_NAMES[style] ? style : 'balanced';
     S.human = human;
@@ -870,6 +876,11 @@ export function createGame(ui) {
         sub += ` ${playerName(E.BLUE)} ${fmt(res.blue)} (${res.blueRating}), ${playerName(E.RED)} ${fmt(res.red)} (${res.redRating}).`;
       }
       if (S.mode === 'online' && r.winner === S.human) grantBadge(stats, 'online-win').forEach((b) => setTimeout(() => ui.badge(b), 900));
+    }
+    if (S.tournament !== null && ui.tournamentResult) {
+      const idx = S.tournament;
+      S.tournament = null;
+      ui.tournamentResult(idx, r.winner);
     }
     if (r.winner === null) sound.play('draw');
     else if (S.mode === 'two' || S.mode === 'watch' || r.winner === S.human) {
@@ -1103,6 +1114,26 @@ export function createGame(ui) {
     await copyText(url, 'Link copied. Anyone can open it and replay the game.');
   }
 
+  function shareImage() {
+    const g = S.game;
+    const ply = shownPly();
+    const b = shownBoard();
+    const r = g.result && isLive() ? g.result : null;
+    const title = r ? (r.winner === null ? 'Draw' : `${humanName(r.winner)} wins`) : `Move ${Math.ceil(ply / 2)}${ply ? '' : ''}`.replace('Move 0', 'Starting position');
+    const subtitle = r ? `${E.describeResult(r)} ${Math.ceil(g.moves.length / 2)} moves.` : `${cap(E.PLAYER_NAMES[turnAt(ply)])} to move.`;
+    const who = `${humanName(E.BLUE)} vs ${humanName(E.RED)}`;
+    const canvas = boardImage({
+      board: b,
+      lastMove: lastMoveAt(ply),
+      flipped: S.flip,
+      title,
+      subtitle: S.mode === 'watch' ? subtitle : `${who}. ${subtitle}`,
+      footer: `${location.host}${location.pathname}`.replace(/\/$/, ''),
+      palette: getSettings().palette,
+    });
+    ui.showImage(canvas, r ? 'intransitive-result.png' : 'intransitive-position.png');
+  }
+
   function loadFromLink(code) {
     const g = E.decodeMoves(code);
     cancelThinking();
@@ -1167,6 +1198,8 @@ export function createGame(ui) {
       save();
     });
     $('overlay-share').addEventListener('click', share);
+    $('overlay-image').addEventListener('click', shareImage);
+    $('btn-tournament').addEventListener('click', () => ui.openTournament());
     $('btn-undo').addEventListener('click', undo);
     $('btn-resign').addEventListener('click', resign);
     $('btn-hint').addEventListener('click', hint);
@@ -1249,7 +1282,7 @@ export function createGame(ui) {
 
   return {
     init, startGame, keydown, loadFromLink, loadMovesText, loadPosition, startOnline, remoteMove, remoteResign, remoteLeft,
-    remoteDrawOffer, remoteDrawAccept, leaveOnline, movesText: () => E.movesText(S.game), positionLink,
+    remoteDrawOffer, remoteDrawAccept, leaveOnline, shareImage, movesText: () => E.movesText(S.game), positionLink,
     get state() { return S; },
     get stats() { return stats; },
     refreshStats() { stats = loadStats(); renderStats(); },

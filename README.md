@@ -41,8 +41,13 @@ captures is a draw.
   arrows, a coach that explains material, matchup, runners and threats in
   plain words, and a game report with accuracy, error counts, a clickable
   evaluation graph and the turning point of the game.
-- Share links for whole games and for single positions, board colour and
-  piece-style settings, and offline support as an installable web app.
+- Share links for whole games and for single positions, PNG share cards of
+  any result or position (copy or download), board colour and piece-style
+  settings including a colourblind-friendly palette, and offline support as
+  an installable web app.
+- Hot-seat tournaments: a round robin for two to eight people at one
+  screen, single or double, with optional clocks, live standings, a
+  standings image, and every game rated as a normal two-player game.
 - A one-minute interactive tutorial, a home page demo game, rules and
   strategy pages with diagrams, and strategy tips on the play page.
 - A large puzzle set mined from the engine: positions with exactly one
@@ -103,6 +108,8 @@ js/coach.js        plain-language position explanations
 js/review.js       game report and evaluation graph
 js/online.js       peer-to-peer online play
 js/settings.js     board and piece appearance
+js/image.js        PNG share cards
+js/tournament.js   round-robin tournaments
 js/puzzledata.js   the puzzle set (generated)
 js/strategy.js     the strategy guide
 js/stats.js        rating, record and badges
